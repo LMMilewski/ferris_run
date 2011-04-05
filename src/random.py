@@ -1,5 +1,5 @@
-
 seed = 0
+
 
 def init(s=13):
     global seed
