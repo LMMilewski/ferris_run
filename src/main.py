@@ -127,7 +127,9 @@ class Sister:
             ferris_dir = direction_to_vector(self.ferris.direction)
             self.target = self.ferris.position[0] + ferris_dir[0] * 80, self.ferris.position[1] + ferris_dir[1] * 80
 
-        self.direction = direction_to_target(self.position, self.target)
+        new_direction = direction_to_target(self.position, self.target)
+        if new_direction != (self.direction + 2) % 4: # can't reverse direction
+            self.direction = new_direction
         self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
 
     def display(self, screen):
