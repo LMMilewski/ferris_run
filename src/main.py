@@ -10,6 +10,11 @@ from sprite import *
 from const import *
 from random import *
 
+def aabb_collision((minx1, miny1, maxx1, maxy1), (minx2, miny2, maxx2, maxy2)):
+    xcollision = (minx1 <= minx2 and minx2 <= maxx1) or ((minx2 <= minx1 and minx1 <= maxx2))
+    ycollision = (miny1 <= miny2 and miny2 <= maxy1) or ((miny2 <= miny1 and miny1 <= maxy2))
+    return xcollision and ycollision
+
 def distance(pos1, pos2):
     dx = pos1[0] - pos2[0]
     dy = pos1[1] - pos2[1]
@@ -79,6 +84,9 @@ class Ferris:
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
 
+    def aabb(self):
+        return self.sprite[self.direction].aabb(self.position)
+
 # should refactor? the code is the same as Ferris's
 class Director:
     def __init__(self, cfg, res, ferris):
@@ -103,6 +111,9 @@ class Director:
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
+
+    def aabb(self):
+        return self.sprite[self.direction].aabb(self.position)
 
 class Sister:
     def __init__(self, cfg, res, ferris):
@@ -136,6 +147,8 @@ class Sister:
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
 
+    def aabb(self):
+        return self.sprite[self.direction].aabb(self.position)
 
 class Dictionary:
     def __init__(self, cfg, res, random):
@@ -150,6 +163,8 @@ class Dictionary:
     def display(self, screen):
         self.sprite.display(screen, self.position)
 
+    def aabb(self):
+        return self.sprite.aabb(self.position)
 
 class FerrisRunGame(GameState):
     def __init__(self, cfg, res):
@@ -167,6 +182,8 @@ class FerrisRunGame(GameState):
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
+
+        self.points = 0
 
     def init(self, screen):
         self.set_level(1)
@@ -186,10 +203,17 @@ class FerrisRunGame(GameState):
         if self.cfg.print_fps:
             print dt, " ", int(1.0/dt)
 
+        # update all objects
         self.ferris.update(dt)
         self.director.update(dt)
         self.sister.update(dt)
         self.dictionary.update(dt)
+
+        # check collision with dictionary
+        if aabb_collision(self.ferris.aabb(), self.dictionary.aabb()):
+            self.res.sounds_play("collect")
+            self.dictionary = Dictionary(self.cfg, self.res, self.random)
+            self.points += 100
 
     def process_event(self, event):
         if event.type == KEYDOWN:
@@ -208,12 +232,19 @@ class FerrisRunGame(GameState):
 
     def display(self, screen):
         self.background.display(screen, (0,0))
+
         self.dictionary.display(screen)
         self.ferris.display(screen)
         self.director.display(screen)
         self.sister.display(screen)
+
         board_size = self.cfg.board_size[0]
         self.hud.display(screen, (board_size,0))
+
+        points_label = self.res.font_render("LESSERCO", 48, "POINTS:", color.by_name["red"])
+        screen.blit(points_label, (self.cfg.board_size[0]+10, 20))
+        points_value = self.res.font_render("LESSERCO", 48, str(self.points), color.by_name["red"])
+        screen.blit(points_value, (self.cfg.board_size[0]+10, 60))
 
     def finish(self):
         self.__is_finished = True
