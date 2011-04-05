@@ -27,20 +27,21 @@ class Resources:
             self.load_music_files()
         self.load_animation_files()
         self.load_font_files()
+        return self
 
     ## define resources you want to use
 
     def load_sound_files(self):
         # add filename without extension here (i.e. 'cha-ching' will
         # load 'cha-ching.ogg' file)
-        files = []
+        files = ["level_start"]
         for file in files:
             self.load_sound_file(file)
 
     def load_music_files(self):
         # add filename without extension here (i.e. 'background' will
         # load 'background.ogg' file)
-        files = []
+        files = ["level_background"]
         for file in files:
             self.load_music_file(file)
 

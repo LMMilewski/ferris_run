@@ -15,7 +15,7 @@ class Config:
         ## general stuff
         self.sound = not "--nosounds" in sys.argv
         self.music = not "--nomusic" in sys.argv
-        self.resolution = 320,240 # in this resolution the game is blited onto Surface
+        self.resolution = 800,600 # in this resolution the game is blited onto Surface
         self.screen_resolution = 800,600 # just before swap buffers the screen is scaled to this resolution
         self.fullscreen = "--fullscreen" in sys.argv
         self.fps_limit = 60
