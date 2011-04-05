@@ -35,8 +35,9 @@ class Config:
 
         ### game specyfic options
         self.ferris_speed = 100
-        self.director_speed = 80
-        self.sister_speed = 95
+        self.director_speed = 60
+        self.sister_speed = 70
+        self.car_speed = 120
         self.board_size = 600,600
 
     def __add_path_getter(self, k, v):

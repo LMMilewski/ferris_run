@@ -55,7 +55,8 @@ class Resources:
                  "ferris-left",
                  "director-left",
                  "sister-left",
-                 "dictionary"]
+                 "dictionary",
+                 "car-left-white"]
         for file in files:
             self.load_animation_file(file)
 
@@ -75,6 +76,25 @@ class Resources:
         self.__map_animation_frames("sister-left", "sister-down",  self.__rotate_image(90))
         self.__map_animation_frames("sister-left", "sister-right", self.__rotate_image(180))
         self.__map_animation_frames("sister-left", "sister-up",    self.__rotate_image(270))
+
+        self.__map_animation_frames("car-left-white", "car-down-white",  self.__rotate_image(90))
+        self.__map_animation_frames("car-left-white", "car-right-white", self.__rotate_image(180))
+        self.__map_animation_frames("car-left-white", "car-up-white",    self.__rotate_image(270))
+
+        self.__blend_animation_with_color("car-left-white", "car-left-red", color.by_name["red"])
+        self.__blend_animation_with_color("car-down-white", "car-down-red", color.by_name["red"])
+        self.__blend_animation_with_color("car-right-white", "car-right-red", color.by_name["red"])
+        self.__blend_animation_with_color("car-up-white", "car-up-red", color.by_name["red"])
+
+        self.__blend_animation_with_color("car-left-white", "car-left-blue", color.by_name["blue"])
+        self.__blend_animation_with_color("car-down-white", "car-down-blue", color.by_name["blue"])
+        self.__blend_animation_with_color("car-right-white", "car-right-blue", color.by_name["blue"])
+        self.__blend_animation_with_color("car-up-white", "car-up-blue", color.by_name["blue"])
+
+        self.__blend_animation_with_color("car-left-white", "car-left-green", color.by_name["green"])
+        self.__blend_animation_with_color("car-down-white", "car-down-green", color.by_name["green"])
+        self.__blend_animation_with_color("car-right-white", "car-right-green", color.by_name["green"])
+        self.__blend_animation_with_color("car-up-white", "car-up-green", color.by_name["green"])
 
         # use __blend_animation_with_color to change color of the
         # sprite. You can use it for very simple skins

@@ -166,6 +166,33 @@ class Dictionary:
     def aabb(self):
         return self.sprite.aabb(self.position)
 
+class Car:
+    def __init__(self, cfg, res, position, direction, color):
+        self.cfg = cfg
+        self.res = res
+
+        self.position = position
+        self.direction = direction
+        self.color = color
+
+        self.sprite = [ Sprite("car-left-"+color, self.res),
+                        Sprite("car-down-"+color, self.res),
+                        Sprite("car-right-"+color, self.res),
+                        Sprite("car-up-"+color, self.res) ]
+
+        self.speed = self.cfg.car_speed
+
+    def update(self, dt):
+        self.sprite[self.direction].update(dt)
+        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+
+    def display(self, screen):
+        self.sprite[self.direction].display(screen, self.position)
+
+    def aabb(self):
+        return self.sprite[self.direction].aabb(self.position)
+
+
 class FerrisRunGame(GameState):
     def __init__(self, cfg, res):
         self.cfg = cfg
@@ -179,6 +206,14 @@ class FerrisRunGame(GameState):
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
+
+        self.cars = []
+        car_colors = ["white", "red", "green", "blue"]
+        for i in range(3):
+            self.cars.append(Car(self.cfg, self.res, (390 + (i%3) * 20, i * 200), DIR_UP, car_colors[i % len(car_colors)]))
+            self.cars.append(Car(self.cfg, self.res, (170 + (i%3) * 20, (i * 200 + 100) % 600), DIR_DOWN, car_colors[i % len(car_colors)]))
+            self.cars.append(Car(self.cfg, self.res, (i * 200, 390 + (i%3) * 20), DIR_RIGHT, car_colors[i % len(car_colors)]))
+            self.cars.append(Car(self.cfg, self.res, ((i * 200 + 100)%600, 170 + (i%3) * 20), DIR_LEFT, car_colors[i % len(car_colors)]))
 
         self.points = 0
         self.deaths = 0
@@ -212,6 +247,8 @@ class FerrisRunGame(GameState):
         self.director.update(dt)
         self.sister.update(dt)
         self.dictionary.update(dt)
+        for car in self.cars:
+            car.update(dt)
 
         # check collision with dictionary
         if aabb_collision(self.ferris.aabb(), self.dictionary.aabb()):
@@ -220,7 +257,7 @@ class FerrisRunGame(GameState):
             self.points += 100
 
         # check collision with enemies
-        enemies = [self.director, self.sister]
+        enemies = [self.director, self.sister] + self.cars
         for enemy in enemies:
             if aabb_collision(self.ferris.aabb(), enemy.aabb()):
                 self.res.sounds_play("die")
@@ -245,6 +282,9 @@ class FerrisRunGame(GameState):
 
     def display(self, screen):
         self.background.display(screen, (0,0))
+
+        for car in self.cars:
+            car.display(screen)
 
         self.dictionary.display(screen)
         self.ferris.display(screen)
