@@ -51,7 +51,8 @@ class Resources:
         files = ["background",
                  "hud",
                  "ferris-left",
-                 "director-left"]
+                 "director-left",
+                 "sister-left"]
         for file in files:
             self.load_animation_file(file)
 
@@ -67,6 +68,10 @@ class Resources:
         self.__map_animation_frames("director-left", "director-down",  self.__rotate_image(90))
         self.__map_animation_frames("director-left", "director-right", self.__rotate_image(180))
         self.__map_animation_frames("director-left", "director-up",    self.__rotate_image(270))
+
+        self.__map_animation_frames("sister-left", "sister-down",  self.__rotate_image(90))
+        self.__map_animation_frames("sister-left", "sister-right", self.__rotate_image(180))
+        self.__map_animation_frames("sister-left", "sister-up",    self.__rotate_image(270))
 
         # use __blend_animation_with_color to change color of the
         # sprite. You can use it for very simple skins

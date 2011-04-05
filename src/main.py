@@ -1,11 +1,18 @@
 import pygame
 from pygame.locals import *
 
+import math
+
 from config import *
 from game_fsm import *
 from resources import *
 from sprite import *
 from const import *
+
+def distance(pos1, pos2):
+    dx = pos1[0] - pos2[0]
+    dy = pos1[1] - pos2[1]
+    return math.sqrt(dx*dx + dy*dy)
 
 def direction_to_vector(direction):
     if direction == DIR_LEFT:
@@ -96,6 +103,36 @@ class Director:
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
 
+class Sister:
+    def __init__(self, cfg, res, ferris):
+        self.cfg = cfg
+        self.res = res
+        self.ferris = ferris
+
+        self.sprite = [ Sprite("sister-left", self.res, 0.25),
+                        Sprite("sister-down", self.res, 0.25),
+                        Sprite("sister-right", self.res, 0.25),
+                        Sprite("sister-up", self.res, 0.25) ]
+        self.direction = DIR_LEFT
+        self.speed = self.cfg.sister_speed
+        self.position = (100,100)
+        self.target = None
+
+    def update(self, dt):
+        self.sprite[self.direction].update(dt)
+
+        if distance(self.ferris.position, self.position) < 50:
+            self.target = self.ferris.position
+        else:
+            ferris_dir = direction_to_vector(self.ferris.direction)
+            self.target = self.ferris.position[0] + ferris_dir[0] * 80, self.ferris.position[1] + ferris_dir[1] * 80
+
+        self.direction = direction_to_target(self.position, self.target)
+        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+
+    def display(self, screen):
+        self.sprite[self.direction].display(screen, self.position)
+
 class FerrisRunGame(GameState):
     def __init__(self, cfg, res):
         self.cfg = cfg
@@ -105,6 +142,7 @@ class FerrisRunGame(GameState):
         self.level_num = None # set in set_level called from init
         self.ferris = Ferris(cfg, res)
         self.director = Director(cfg, res, self.ferris)
+        self.sister = Sister(cfg, res, self.ferris)
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
@@ -129,6 +167,7 @@ class FerrisRunGame(GameState):
 
         self.ferris.update(dt)
         self.director.update(dt)
+        self.sister.update(dt)
 
     def process_event(self, event):
         if event.type == KEYDOWN:
@@ -151,6 +190,7 @@ class FerrisRunGame(GameState):
         board_size = self.cfg.board_size[0]
         self.hud.display(screen, (board_size,0))
         self.director.display(screen)
+        self.sister.display(screen)
 
     def finish(self):
         self.__is_finished = True
