@@ -20,6 +20,8 @@ class Config:
         self.fullscreen = "--fullscreen" in sys.argv
         self.fps_limit = 60
 
+        self.print_fps = False
+
         ## paths
         base_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         self.__path={}
@@ -30,6 +32,11 @@ class Config:
         # closures are create by function calls
         for k, v in self.__path.items():
             self.__add_path_getter(k,v)
+
+        ### game specyfic options
+        self.ferris_speed = 80
+        self.director_speed = 50
+        self.board_size = 600,600
 
     def __add_path_getter(self, k, v):
             setattr(Config,

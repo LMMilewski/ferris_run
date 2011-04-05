@@ -48,7 +48,10 @@ class Resources:
     def load_animation_files(self):
         # add filename without extension here (i.e. 'bg' will
         # load 'bg.png' file)
-        files = []
+        files = ["background",
+                 "hud",
+                 "ferris-left",
+                 "director-left"]
         for file in files:
             self.load_animation_file(file)
 
@@ -57,6 +60,13 @@ class Resources:
         # i.e.
         # self.__map_animation_frames("orig_anim", "dest_anim",  self.__rotate_image(90))
         # will rotate it 90 degrees counter-clockwise
+        self.__map_animation_frames("ferris-left", "ferris-down",  self.__rotate_image(90))
+        self.__map_animation_frames("ferris-left", "ferris-right", self.__rotate_image(180))
+        self.__map_animation_frames("ferris-left", "ferris-up",    self.__rotate_image(270))
+
+        self.__map_animation_frames("director-left", "director-down",  self.__rotate_image(90))
+        self.__map_animation_frames("director-left", "director-right", self.__rotate_image(180))
+        self.__map_animation_frames("director-left", "director-up",    self.__rotate_image(270))
 
         # use __blend_animation_with_color to change color of the
         # sprite. You can use it for very simple skins
