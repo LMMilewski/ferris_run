@@ -52,7 +52,8 @@ class Resources:
                  "hud",
                  "ferris-left",
                  "director-left",
-                 "sister-left"]
+                 "sister-left",
+                 "dictionary"]
         for file in files:
             self.load_animation_file(file)
 

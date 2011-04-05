@@ -8,6 +8,7 @@ from game_fsm import *
 from resources import *
 from sprite import *
 from const import *
+from random import *
 
 def distance(pos1, pos2):
     dx = pos1[0] - pos2[0]
@@ -121,7 +122,7 @@ class Sister:
     def update(self, dt):
         self.sprite[self.direction].update(dt)
 
-        if distance(self.ferris.position, self.position) < 50:
+        if distance(self.ferris.position, self.position) < 70:
             self.target = self.ferris.position
         else:
             ferris_dir = direction_to_vector(self.ferris.direction)
@@ -135,16 +136,34 @@ class Sister:
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
 
+
+class Dictionary:
+    def __init__(self, cfg, res, random):
+        self.cfg = cfg
+        self.res = res
+        self.sprite = Sprite("dictionary", self.res, 0.25)
+        self.position = (random.integer(20,580), random.integer(20,580))
+
+    def update(self, dt):
+        self.sprite.update(dt)
+
+    def display(self, screen):
+        self.sprite.display(screen, self.position)
+
+
 class FerrisRunGame(GameState):
     def __init__(self, cfg, res):
         self.cfg = cfg
         self.res = res
+
+        self.random = Random()
 
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
         self.ferris = Ferris(cfg, res)
         self.director = Director(cfg, res, self.ferris)
         self.sister = Sister(cfg, res, self.ferris)
+        self.dictionary = Dictionary(cfg, res, self.random)
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
@@ -170,6 +189,7 @@ class FerrisRunGame(GameState):
         self.ferris.update(dt)
         self.director.update(dt)
         self.sister.update(dt)
+        self.dictionary.update(dt)
 
     def process_event(self, event):
         if event.type == KEYDOWN:
@@ -188,11 +208,12 @@ class FerrisRunGame(GameState):
 
     def display(self, screen):
         self.background.display(screen, (0,0))
+        self.dictionary.display(screen)
         self.ferris.display(screen)
-        board_size = self.cfg.board_size[0]
-        self.hud.display(screen, (board_size,0))
         self.director.display(screen)
         self.sister.display(screen)
+        board_size = self.cfg.board_size[0]
+        self.hud.display(screen, (board_size,0))
 
     def finish(self):
         self.__is_finished = True
