@@ -175,23 +175,27 @@ class FerrisRunGame(GameState):
 
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
-        self.ferris = Ferris(cfg, res)
-        self.director = Director(cfg, res, self.ferris)
-        self.sister = Sister(cfg, res, self.ferris)
         self.dictionary = Dictionary(cfg, res, self.random)
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
 
         self.points = 0
+        self.deaths = 0
 
     def init(self, screen):
         self.set_level(1)
 
     def set_level(self, level_num):
         self.level_num = level_num
+        self.reset_level()
         self.res.music_play("level_background")
         self.res.sounds_play("level_start")
+
+    def reset_level(self):
+        self.ferris = Ferris(self.cfg, self.res)
+        self.director = Director(self.cfg, self.res, self.ferris)
+        self.sister = Sister(self.cfg, self.res, self.ferris)
 
     def go_to_next_level(self):
         self.set_level(self.level_num + 1)
@@ -214,6 +218,15 @@ class FerrisRunGame(GameState):
             self.res.sounds_play("collect")
             self.dictionary = Dictionary(self.cfg, self.res, self.random)
             self.points += 100
+
+        # check collision with enemies
+        enemies = [self.director, self.sister]
+        for enemy in enemies:
+            if aabb_collision(self.ferris.aabb(), enemy.aabb()):
+                self.res.sounds_play("die")
+                self.deaths += 1
+                self.reset_level()
+                return
 
     def process_event(self, event):
         if event.type == KEYDOWN:
@@ -241,10 +254,16 @@ class FerrisRunGame(GameState):
         board_size = self.cfg.board_size[0]
         self.hud.display(screen, (board_size,0))
 
-        points_label = self.res.font_render("LESSERCO", 48, "POINTS:", color.by_name["red"])
+        points_label = self.res.font_render("LESSERCO", 48, "POINTS:", color.by_name["green"])
         screen.blit(points_label, (self.cfg.board_size[0]+10, 20))
-        points_value = self.res.font_render("LESSERCO", 48, str(self.points), color.by_name["red"])
+        points_value = self.res.font_render("LESSERCO", 48, str(self.points), color.by_name["green"])
         screen.blit(points_value, (self.cfg.board_size[0]+10, 60))
+
+        points_label = self.res.font_render("LESSERCO", 48, "DEATHS:", color.by_name["red"])
+        screen.blit(points_label, (self.cfg.board_size[0]+10, 120))
+        points_value = self.res.font_render("LESSERCO", 48, str(self.deaths), color.by_name["red"])
+        screen.blit(points_value, (self.cfg.board_size[0]+10, 160))
+
 
     def finish(self):
         self.__is_finished = True
