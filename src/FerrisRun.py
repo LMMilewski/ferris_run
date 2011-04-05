@@ -16,8 +16,7 @@ class FerrisRunMain:
     def LoadCops(self, x):
         self.cops = [];
         for i in range(1, x + 1):
-            print "Adding cop " + str(i);
-            self.cops.append(cop.Cop(i *100, i * 100, i * 100, i * 100, i * 100, i * 100));
+            self.cops.append(cop.Cop(i * 100, i * 100, i * 200, i * 100));
     
     def run_game(self):
         self.LoadCops(3);
@@ -26,8 +25,14 @@ class FerrisRunMain:
                 if event.type == pygame.QUIT:
                     print "Exiting game"; 
                     sys.exit();
+            sprites_to_update = pygame.sprite.Group();
             for cop in self.cops:
-                cop.cop_sprite.draw(self.screen);
+                cop.update(1);
+                sprites_to_update.add(cop.GetSprite());
+            
+            sprites_to_update.update();
+            self.screen.fill((146, 218, 255));
+            sprites_to_update.draw(self.screen);
             pygame.display.flip();
 
 if __name__ == "__main__":
