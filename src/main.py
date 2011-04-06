@@ -290,13 +290,15 @@ class FerrisRunGame(GameState):
         self.currentOffset = 0
 
     def init(self, screen):
+        self.bullet_time = False
         self.ferris = Ferris(self.cfg, self.res)
         self.set_level(1)
         self.define_possible_bonuses()
 
     def define_possible_bonuses(self):
         self.possible_bonuses = [
-            [ Bonus(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed") ],
+            [ Bonus(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
+              Bonus(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow")],
             [ ]
             ]
 
@@ -320,6 +322,9 @@ class FerrisRunGame(GameState):
             bonus.reset()
 
     def update(self, dt):
+        if self.bullet_time:
+            dt *= self.cfg.bullet_slowdown_factor
+
         self.background.update(dt)
         self.hud.update(dt)
 
@@ -330,12 +335,18 @@ class FerrisRunGame(GameState):
             return
 
         # update all objects
-        self.ferris.update(dt)
+        if self.bullet_time:
+            self.ferris.update(dt / self.cfg.bullet_slowdown_factor)
+        else:
+            self.ferris.update(dt)
         self.director.update(dt)
         self.sister.update(dt)
         self.register.update(dt)
         for bonus in self.bonuses:
-            bonus.update(dt)
+            if self.bullet_time:
+                bonus.update(dt / self.cfg.bullet_slowdown_factor)
+            else:
+                bonus.update(dt)
 
         # check collision with register
         if aabb_collision(self.ferris.aabb(), self.register.aabb()):
@@ -366,6 +377,12 @@ class FerrisRunGame(GameState):
             for lane in self.lanes:
                 lane.changeState()
 
+    def bullet_time_on(self):
+        self.bullet_time = True
+
+    def bullet_time_off(self):
+        self.bullet_time = False
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             self.stopped = False
@@ -385,7 +402,8 @@ class FerrisRunGame(GameState):
                 if len(self.bonuses) > 0:
                     self.bonuses[0].activate()
             if event.key == K_2:
-                pass
+                if len(self.bonuses) > 1:
+                    self.bonuses[1].activate()
             if event.key == K_3:
                 pass
             if event.key == K_4:

@@ -58,7 +58,9 @@ class Resources:
                  "register",
                  "car-left-white",
                  "bonus-speed-mini",
-                 "bonus-speed-mini-dark"]
+                 "bonus-speed-mini-dark",
+                 "bonus-slow-mini",
+                 "bonus-slow-mini-dark"]
         for file in files:
             self.load_animation_file(file)
 

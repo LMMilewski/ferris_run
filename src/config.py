@@ -42,6 +42,7 @@ class Config:
         self.board_size = 600,600
         self.registers_per_level = 9
         self.bonus_duration = 10
+        self.bullet_slowdown_factor = 0.5
 
     def __add_path_getter(self, k, v):
             setattr(Config,
