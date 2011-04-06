@@ -64,6 +64,37 @@ def get_next_position(cfg, position, direction, dt, speed):
         py = -5
     return px, py
 
+
+class Bonus:
+    def __init__(self, cfg, res, command, undo_command, name):
+        self.cfg = cfg
+        self.res = res
+        self.command = command
+        self.undo_command = undo_command
+        self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
+        self.reset()
+
+    def activate(self):
+        self.active = True
+        self.command()
+
+    def deactivate(self):
+        self.finished = True
+        self.active = False
+        self.undo_command()
+        self.time_left = 0
+
+    def update(self, dt):
+        if self.active:
+            self.time_left -= dt
+            if self.time_left <= 0:
+                self.deactivate()
+
+    def reset(self):
+        self.active = False
+        self.time_left = self.cfg.bonus_duration
+        self.finished = False
+
 class Ferris:
     def __init__(self, cfg, res):
         self.cfg = cfg
@@ -73,9 +104,8 @@ class Ferris:
                         Sprite("ferris-down", self.res, 0.5),
                         Sprite("ferris-right", self.res, 0.5),
                         Sprite("ferris-up", self.res, 0.5) ]
-        self.direction = DIR_LEFT
         self.speed = self.cfg.ferris_speed
-        self.position = (300,300)
+        self.reset()
 
     def update(self, dt):
         self.sprite[self.direction].update(dt)
@@ -87,7 +117,17 @@ class Ferris:
     def aabb(self):
         return self.sprite[self.direction].aabb(self.position)
 
-# should refactor? the code is the same as Ferris's
+    def reset(self):
+        self.position = (300,300)
+        self.direction = DIR_LEFT
+
+    def set_speed_normal(self):
+        self.speed = self.cfg.ferris_speed
+
+    def set_speed_fast(self):
+        self.speed = self.cfg.ferris_speed_fast
+
+# should refactor? the code is the same as Ferris's and other guys
 class Director:
     def __init__(self, cfg, res, ferris):
         self.cfg = cfg
@@ -217,20 +257,30 @@ class FerrisRunGame(GameState):
 
         self.points = 0
         self.deaths = 0
+        self.bonuses = []
 
         self.stopped = True # the game is not playing right now (characters don't move etc)
 
     def init(self, screen):
+        self.ferris = Ferris(self.cfg, self.res)
         self.set_level(1)
+        self.define_possible_bonuses()
+
+    def define_possible_bonuses(self):
+        self.possible_bonuses = [
+            [ Bonus(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed") ],
+            [ ]
+            ]
 
     def set_level(self, level_num):
         self.level_num = level_num
         self.reset_level()
         self.res.music_play("level_background")
         self.res.sounds_play("level_start")
+        self.registers_left = self.cfg.registers_per_level
 
     def reset_level(self):
-        self.ferris = Ferris(self.cfg, self.res)
+        self.ferris.reset()
         self.director = Director(self.cfg, self.res, self.ferris)
         self.sister = Sister(self.cfg, self.res, self.ferris)
         self.stopped = True
@@ -253,6 +303,8 @@ class FerrisRunGame(GameState):
         self.director.update(dt)
         self.sister.update(dt)
         self.register.update(dt)
+        for bonus in self.bonuses:
+            bonus.update(dt)
         for car in self.cars:
             car.update(dt)
 
@@ -261,6 +313,10 @@ class FerrisRunGame(GameState):
             self.res.sounds_play("collect")
             self.register = Register(self.cfg, self.res, self.random)
             self.points += 100
+            self.registers_left -= 1
+            if self.registers_left <= 0:
+                self.go_to_next_level()
+                return
 
         # check collision with enemies
         enemies = [self.director, self.sister] + self.cars
@@ -287,6 +343,21 @@ class FerrisRunGame(GameState):
             if event.key == K_p:
                 self.stopped = True
             if event.key == K_1:
+                if len(self.bonuses) > 0:
+                    self.bonuses[0].activate()
+            if event.key == K_2:
+                pass
+            if event.key == K_3:
+                pass
+            if event.key == K_4:
+                pass
+            if event.key == K_5:
+                pass
+            if event.key == K_8:
+                self.bonuses = self.possible_bonuses[0]
+            if event.key == K_9:
+                self.bonuses = self.possible_bonuses[1]
+            if event.key ==K_0:
                 self.cfg.print_fps = not self.cfg.print_fps
 
     def display(self, screen):
@@ -303,36 +374,46 @@ class FerrisRunGame(GameState):
         board_size = self.cfg.board_size[0]
         self.hud.display(screen, (board_size,0))
 
-        level_label = self.res.font_render("LESSERCO", 48, "LEVEL:", color.by_name["green"])
-        screen.blit(level_label, (self.cfg.board_size[0]+10, 20))
-        level_value = self.res.font_render("LESSERCO", 48, str(self.level_num), color.by_name["green"])
-        screen.blit(level_value, (self.cfg.board_size[0]+10, 60))
+        # hud
+        menu_x = self.cfg.board_size[0] + 10
+        self.display_key_value(screen, (menu_x, 20), "LEVEL", self.level_num)
+        self.display_key_value(screen, (menu_x, 70), "POINTS", self.points)
+        self.display_key_value(screen, (menu_x, 130), "DEATHS", self.deaths)
+        self.display_key_value(screen, (menu_x, 180), "REGISTERS", self.registers_left)
 
-        points_label = self.res.font_render("LESSERCO", 48, "POINTS:", color.by_name["green"])
-        screen.blit(points_label, (self.cfg.board_size[0]+10, 120))
-        points_value = self.res.font_render("LESSERCO", 48, str(self.points), color.by_name["green"])
-        screen.blit(points_value, (self.cfg.board_size[0]+10, 160))
+        # bonuses
+        bonus_y = 300
+        if self.bonuses != []:
+            self.display_key_value(screen, (menu_x, bonus_y-40), "BONUSES")
+        for bonus in self.bonuses:
+            if bonus.active:
+                pygame.draw.rect(screen, color.by_name["blue"], (self.cfg.board_size[0]+10-3, bonus_y-1, 46, 43), 3)
+            bonus.sprite.display(screen, (self.cfg.board_size[0]+10, bonus_y))
+            text_time_left = self.res.font_render("LESSERCO", 36, str(bonus.time_left), color.by_name["red"])
+            screen.blit(text_time_left, (menu_x + 60, bonus_y))
+            bonus_y += 50
 
-        points_label = self.res.font_render("LESSERCO", 48, "DEATHS:", color.by_name["red"])
-        screen.blit(points_label, (self.cfg.board_size[0]+10, 220))
-        points_value = self.res.font_render("LESSERCO", 48, str(self.deaths), color.by_name["red"])
-        screen.blit(points_value, (self.cfg.board_size[0]+10, 260))
-
+        # pause menu
         if self.stopped:
             dark = pygame.Surface(self.cfg.screen_resolution).convert_alpha()
             dark.fill((0,0,0,200))
             screen.blit(dark, (0,0))
             stopped_text = self.res.font_render("LESSERCO", 90, "THE GAME IS PAUSED", color.by_name["red"])
             screen.blit(stopped_text, (110,200))
-            anykey_text = self.res.font_render("LESSERCO", 48, "Please press any key to start", color.by_name["red"])
+            anykey_text = self.res.font_render("LESSERCO", 36, "Please press any key to start", color.by_name["red"])
             screen.blit(anykey_text, (160,270))
-            arrows_text = self.res.font_render("LESSERCO", 48, "You are in center. Use arrows to move", color.by_name["red"])
+            arrows_text = self.res.font_render("LESSERCO", 36, "You are in center. Use arrows to move", color.by_name["red"])
             screen.blit(arrows_text, (110,350))
-            avoid_text = self.res.font_render("LESSERCO", 48, "Avoid cars, director and sister", color.by_name["red"])
+            avoid_text = self.res.font_render("LESSERCO", 36, "Avoid cars, director and sister", color.by_name["red"])
             screen.blit(avoid_text, (110,400))
-            collect_text = self.res.font_render("LESSERCO", 48, "Collect dictionaries (stars)", color.by_name["red"])
+            collect_text = self.res.font_render("LESSERCO", 36, "Collect dictionaries (stars)", color.by_name["red"])
             screen.blit(collect_text, (110,450))
 
+    def display_key_value(self, screen, position, key, value = ""):
+        label = self.res.font_render("LESSERCO", 36, str(key), color.by_name["red"])
+        screen.blit(label, (position[0], position[1]))
+        value = self.res.font_render("LESSERCO", 36, str(value), color.by_name["red"])
+        screen.blit(value, (position[0]+130, position[1]))
 
     def finish(self):
         self.__is_finished = True

@@ -56,7 +56,8 @@ class Resources:
                  "director-left",
                  "sister-left",
                  "register",
-                 "car-left-white"]
+                 "car-left-white",
+                 "bonus-speed-mini"]
         for file in files:
             self.load_animation_file(file)
 
@@ -106,7 +107,7 @@ class Resources:
         # load 'main.ttf' file)
         # add fonts in format
         # (fontname, fontsize)
-        files = [("LESSERCO", 48),
+        files = [("LESSERCO", 36),
                  ("LESSERCO", 90)]
         for file in files:
             self.load_font_file(file[0], file[1])
