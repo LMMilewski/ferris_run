@@ -150,11 +150,11 @@ class Sister:
     def aabb(self):
         return self.sprite[self.direction].aabb(self.position)
 
-class Dictionary:
+class Register:
     def __init__(self, cfg, res, random):
         self.cfg = cfg
         self.res = res
-        self.sprite = Sprite("dictionary", self.res, 0.25)
+        self.sprite = Sprite("register", self.res, 0.25)
         self.position = (random.integer(20,580), random.integer(20,580))
 
     def update(self, dt):
@@ -202,7 +202,7 @@ class FerrisRunGame(GameState):
 
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
-        self.dictionary = Dictionary(cfg, res, self.random)
+        self.register = Register(cfg, res, self.random)
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
@@ -252,14 +252,14 @@ class FerrisRunGame(GameState):
         self.ferris.update(dt)
         self.director.update(dt)
         self.sister.update(dt)
-        self.dictionary.update(dt)
+        self.register.update(dt)
         for car in self.cars:
             car.update(dt)
 
-        # check collision with dictionary
-        if aabb_collision(self.ferris.aabb(), self.dictionary.aabb()):
+        # check collision with register
+        if aabb_collision(self.ferris.aabb(), self.register.aabb()):
             self.res.sounds_play("collect")
-            self.dictionary = Dictionary(self.cfg, self.res, self.random)
+            self.register = Register(self.cfg, self.res, self.random)
             self.points += 100
 
         # check collision with enemies
@@ -295,7 +295,7 @@ class FerrisRunGame(GameState):
         for car in self.cars:
             car.display(screen)
 
-        self.dictionary.display(screen)
+        self.register.display(screen)
         self.ferris.display(screen)
         self.director.display(screen)
         self.sister.display(screen)

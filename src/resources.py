@@ -55,7 +55,7 @@ class Resources:
                  "ferris-left",
                  "director-left",
                  "sister-left",
-                 "dictionary",
+                 "register",
                  "car-left-white"]
         for file in files:
             self.load_animation_file(file)
