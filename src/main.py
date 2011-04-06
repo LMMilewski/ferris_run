@@ -303,15 +303,20 @@ class FerrisRunGame(GameState):
         board_size = self.cfg.board_size[0]
         self.hud.display(screen, (board_size,0))
 
+        level_label = self.res.font_render("LESSERCO", 48, "LEVEL:", color.by_name["green"])
+        screen.blit(level_label, (self.cfg.board_size[0]+10, 20))
+        level_value = self.res.font_render("LESSERCO", 48, str(self.level_num), color.by_name["green"])
+        screen.blit(level_value, (self.cfg.board_size[0]+10, 60))
+
         points_label = self.res.font_render("LESSERCO", 48, "POINTS:", color.by_name["green"])
-        screen.blit(points_label, (self.cfg.board_size[0]+10, 20))
+        screen.blit(points_label, (self.cfg.board_size[0]+10, 120))
         points_value = self.res.font_render("LESSERCO", 48, str(self.points), color.by_name["green"])
-        screen.blit(points_value, (self.cfg.board_size[0]+10, 60))
+        screen.blit(points_value, (self.cfg.board_size[0]+10, 160))
 
         points_label = self.res.font_render("LESSERCO", 48, "DEATHS:", color.by_name["red"])
-        screen.blit(points_label, (self.cfg.board_size[0]+10, 120))
+        screen.blit(points_label, (self.cfg.board_size[0]+10, 220))
         points_value = self.res.font_render("LESSERCO", 48, str(self.deaths), color.by_name["red"])
-        screen.blit(points_value, (self.cfg.board_size[0]+10, 160))
+        screen.blit(points_value, (self.cfg.board_size[0]+10, 260))
 
         if self.stopped:
             dark = pygame.Surface(self.cfg.screen_resolution).convert_alpha()
