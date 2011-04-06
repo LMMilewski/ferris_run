@@ -57,7 +57,8 @@ class Resources:
                  "sister-left",
                  "register",
                  "car-left-white",
-                 "bonus-speed-mini"]
+                 "bonus-speed-mini",
+                 "bonus-speed-mini-dark"]
         for file in files:
             self.load_animation_file(file)
 

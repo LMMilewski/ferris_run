@@ -72,6 +72,7 @@ class Bonus:
         self.command = command
         self.undo_command = undo_command
         self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
+        self.sprite_dark = Sprite(name + "-mini-dark", self.res, None, ORIGIN_TOP_LEFT)
         self.reset()
 
     def activate(self):
@@ -287,6 +288,9 @@ class FerrisRunGame(GameState):
 
     def go_to_next_level(self):
         self.set_level(self.level_num + 1)
+        for bonus in self.bonuses:
+            bonus.deactivate()
+            bonus.reset()
 
     def update(self, dt):
         self.background.update(dt)
@@ -353,10 +357,12 @@ class FerrisRunGame(GameState):
                 pass
             if event.key == K_5:
                 pass
-            if event.key == K_8:
+            if event.key == K_7:
                 self.bonuses = self.possible_bonuses[0]
-            if event.key == K_9:
+            if event.key == K_8:
                 self.bonuses = self.possible_bonuses[1]
+            if event.key == K_9:
+                self.go_to_next_level()
             if event.key ==K_0:
                 self.cfg.print_fps = not self.cfg.print_fps
 
@@ -388,7 +394,10 @@ class FerrisRunGame(GameState):
         for bonus in self.bonuses:
             if bonus.active:
                 pygame.draw.rect(screen, color.by_name["blue"], (self.cfg.board_size[0]+10-3, bonus_y-1, 46, 43), 3)
-            bonus.sprite.display(screen, (self.cfg.board_size[0]+10, bonus_y))
+            if bonus.finished:
+                bonus.sprite_dark.display(screen, (self.cfg.board_size[0]+10, bonus_y))
+            else:
+                bonus.sprite.display(screen, (self.cfg.board_size[0]+10, bonus_y))
             text_time_left = self.res.font_render("LESSERCO", 36, str(bonus.time_left), color.by_name["red"])
             screen.blit(text_time_left, (menu_x + 60, bonus_y))
             bonus_y += 50
