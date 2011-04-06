@@ -86,7 +86,10 @@ class GameFsm:
             dt = self.clock.tick(self.cfg.fps_limit) * 0.001
             self.__process_events()
             if self.current_state.is_finished():
-                self.set_state(self.current_state.new_state())
+                if self.current_state.next_state() == null_game_state:
+                    self.finish()
+                else:
+                    self.set_state(self.current_state.next_state())
                 continue
             self.current_state.update(dt)
 

@@ -15,7 +15,7 @@ class Resources:
     """
     def __init__(self, cfg):
         self.cfg = cfg
-        self.sounds     = {}
+        self.sounds    = {}
         self.music     = {}
         self.font      = {}
         self.animation = {}
@@ -27,27 +27,36 @@ class Resources:
             self.load_music_files()
         self.load_animation_files()
         self.load_font_files()
+        return self
 
     ## define resources you want to use
 
     def load_sound_files(self):
         # add filename without extension here (i.e. 'cha-ching' will
         # load 'cha-ching.ogg' file)
-        files = []
+        files = ["level_start",
+                 "collect",
+                 "die"]
         for file in files:
             self.load_sound_file(file)
 
     def load_music_files(self):
         # add filename without extension here (i.e. 'background' will
         # load 'background.ogg' file)
-        files = []
+        files = ["level_background"]
         for file in files:
             self.load_music_file(file)
 
     def load_animation_files(self):
         # add filename without extension here (i.e. 'bg' will
         # load 'bg.png' file)
-        files = []
+        files = ["background",
+                 "hud",
+                 "ferris-left",
+                 "director-left",
+                 "sister-left",
+                 "dictionary",
+                 "car-left-white"]
         for file in files:
             self.load_animation_file(file)
 
@@ -56,6 +65,36 @@ class Resources:
         # i.e.
         # self.__map_animation_frames("orig_anim", "dest_anim",  self.__rotate_image(90))
         # will rotate it 90 degrees counter-clockwise
+        self.__map_animation_frames("ferris-left", "ferris-down",  self.__rotate_image(90))
+        self.__map_animation_frames("ferris-left", "ferris-right", self.__rotate_image(180))
+        self.__map_animation_frames("ferris-left", "ferris-up",    self.__rotate_image(270))
+
+        self.__map_animation_frames("director-left", "director-down",  self.__rotate_image(90))
+        self.__map_animation_frames("director-left", "director-right", self.__rotate_image(180))
+        self.__map_animation_frames("director-left", "director-up",    self.__rotate_image(270))
+
+        self.__map_animation_frames("sister-left", "sister-down",  self.__rotate_image(90))
+        self.__map_animation_frames("sister-left", "sister-right", self.__rotate_image(180))
+        self.__map_animation_frames("sister-left", "sister-up",    self.__rotate_image(270))
+
+        self.__map_animation_frames("car-left-white", "car-down-white",  self.__rotate_image(90))
+        self.__map_animation_frames("car-left-white", "car-right-white", self.__rotate_image(180))
+        self.__map_animation_frames("car-left-white", "car-up-white",    self.__rotate_image(270))
+
+        self.__blend_animation_with_color("car-left-white", "car-left-red", color.by_name["red"])
+        self.__blend_animation_with_color("car-down-white", "car-down-red", color.by_name["red"])
+        self.__blend_animation_with_color("car-right-white", "car-right-red", color.by_name["red"])
+        self.__blend_animation_with_color("car-up-white", "car-up-red", color.by_name["red"])
+
+        self.__blend_animation_with_color("car-left-white", "car-left-blue", color.by_name["blue"])
+        self.__blend_animation_with_color("car-down-white", "car-down-blue", color.by_name["blue"])
+        self.__blend_animation_with_color("car-right-white", "car-right-blue", color.by_name["blue"])
+        self.__blend_animation_with_color("car-up-white", "car-up-blue", color.by_name["blue"])
+
+        self.__blend_animation_with_color("car-left-white", "car-left-green", color.by_name["green"])
+        self.__blend_animation_with_color("car-down-white", "car-down-green", color.by_name["green"])
+        self.__blend_animation_with_color("car-right-white", "car-right-green", color.by_name["green"])
+        self.__blend_animation_with_color("car-up-white", "car-up-green", color.by_name["green"])
 
         # use __blend_animation_with_color to change color of the
         # sprite. You can use it for very simple skins
@@ -67,9 +106,10 @@ class Resources:
         # load 'main.ttf' file)
         # add fonts in format
         # (fontname, fontsize)
-        files = []
+        files = [("LESSERCO", 48),
+                 ("LESSERCO", 90)]
         for file in files:
-            self.load_animation_file(file[0], file[1])
+            self.load_font_file(file[0], file[1])
 
     ## use resources
     def sounds_play(self, name, loop=0):
