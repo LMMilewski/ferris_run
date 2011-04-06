@@ -2,13 +2,17 @@ import pygame
 from pygame.locals import *
 
 import math
+import random
+import traffic_light, const
 
 from config import *
 from game_fsm import *
 from resources import *
 from sprite import *
-from const import *
-from random import *
+
+from lane import Lane
+from car import Car
+from traffic_light import TrafficLight
 
 def aabb_collision((minx1, miny1, maxx1, maxy1), (minx2, miny2, maxx2, maxy2)):
     xcollision = (minx1 <= minx2 and minx2 <= maxx1) or ((minx2 <= minx1 and minx1 <= maxx2))
@@ -192,7 +196,7 @@ class Sister:
         return self.sprite[self.direction].aabb(self.position)
 
 class Register:
-    def __init__(self, cfg, res, random):
+    def __init__(self, cfg, res):
         self.cfg = cfg
         self.res = res
         self.sprite = Sprite("register", self.res, 0.25)
@@ -239,28 +243,51 @@ class FerrisRunGame(GameState):
         self.cfg = cfg
         self.res = res
 
-        self.random = Random()
+        random.init()
 
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
-        self.register = Register(cfg, res, self.random)
+        self.register = Register(cfg, res)
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
-
-        self.cars = []
-        car_colors = ["white", "red", "green", "blue"]
-        for i in range(3):
-            self.cars.append(Car(self.cfg, self.res, (390 + (i%3) * 20, i * 200), DIR_UP, car_colors[i % len(car_colors)]))
-            self.cars.append(Car(self.cfg, self.res, (170 + (i%3) * 20, (i * 200 + 100) % 600), DIR_DOWN, car_colors[i % len(car_colors)]))
-            self.cars.append(Car(self.cfg, self.res, (i * 200, 390 + (i%3) * 20), DIR_RIGHT, car_colors[i % len(car_colors)]))
-            self.cars.append(Car(self.cfg, self.res, ((i * 200 + 100)%600, 170 + (i%3) * 20), DIR_LEFT, car_colors[i % len(car_colors)]))
 
         self.points = 0
         self.deaths = 0
         self.bonuses = []
 
         self.stopped = True # the game is not playing right now (characters don't move etc)
+
+        self.trafficLights = [TrafficLight(traffic_light.GREEN),
+                              TrafficLight(traffic_light.GREEN),
+                              TrafficLight(traffic_light.GREEN),
+                              TrafficLight(traffic_light.GREEN),
+                              TrafficLight(traffic_light.RED)]
+        self.trafficLights[0].setPosition(170, 160)
+        self.trafficLights[1].setPosition(390, 160)
+        self.trafficLights[2].setPosition(220, 300)
+        self.trafficLights[3].setPosition(440, 300)
+        self.trafficLights[4].setPosition(140, 440)
+
+        crossings =  [(160, 160, 80, 80), (380, 160, 80, 80), (160, 380, 80, 80), (380, 380, 80, 80)]
+
+        self.lanes = [Lane(0.6, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 7, (0, 160), [(160, 160, 80, 80), (380, 160, 80, 80)], self.cfg),
+                 Lane(1, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 5, (0, 180), [(160, 160, 80, 80), (380, 160, 80, 80)], self.cfg),
+                 Lane(2, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 5, (0, 200), [(160, 160, 80, 80), (380, 160, 80, 80)], self.cfg),
+                 Lane(1, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 5, (self.cfg.board_size[0] - 40, 380), [(160, 380, 80, 80), (380, 380, 80, 80)], self.cfg),
+                 Lane(2, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 8, (self.cfg.board_size[0] - 40, 400), [(160, 380, 80, 80), (380, 380, 80, 80)], self.cfg),
+                 Lane(2, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 6, (self.cfg.board_size[0] - 40, 420), [(160, 380, 80, 80), (380, 380, 80, 80)], self.cfg),
+                 Lane(2, [self.trafficLights[4]], const.UP, 6, (160, self.cfg.board_size[1] - 40), [(160, 380, 80, 80), (160, 380, 80, 80)], self.cfg)]
+
+        self.cars = []
+        for lane in self.lanes:
+            self.cars += lane.getCars()
+        self.allsprites = pygame.sprite.RenderPlain(self.cars + self.trafficLights)
+
+        self.time = 0
+        self.lasttime = 0
+        self.timeoffset = [10, 3]
+        self.currentOffset = 0
 
     def init(self, screen):
         self.ferris = Ferris(self.cfg, self.res)
@@ -309,13 +336,11 @@ class FerrisRunGame(GameState):
         self.register.update(dt)
         for bonus in self.bonuses:
             bonus.update(dt)
-        for car in self.cars:
-            car.update(dt)
 
         # check collision with register
         if aabb_collision(self.ferris.aabb(), self.register.aabb()):
             self.res.sounds_play("collect")
-            self.register = Register(self.cfg, self.res, self.random)
+            self.register = Register(self.cfg, self.res)
             self.points += 100
             self.registers_left -= 1
             if self.registers_left <= 0:
@@ -330,6 +355,16 @@ class FerrisRunGame(GameState):
                 self.deaths += 1
                 self.reset_level()
                 return
+
+        self.allsprites.update()
+        self.time += dt
+        if self.time > self.lasttime + self.timeoffset[self.currentOffset]:
+            self.lasttime = self.time
+            self.currentOffset = 1 - self.currentOffset
+            for light in self.trafficLights:
+                light.changeState()
+            for lane in self.lanes:
+                lane.changeState()
 
     def process_event(self, event):
         if event.type == KEYDOWN:
@@ -368,9 +403,6 @@ class FerrisRunGame(GameState):
 
     def display(self, screen):
         self.background.display(screen, (0,0))
-
-        for car in self.cars:
-            car.display(screen)
 
         self.register.display(screen)
         self.ferris.display(screen)
@@ -417,6 +449,8 @@ class FerrisRunGame(GameState):
             screen.blit(avoid_text, (110,400))
             collect_text = self.res.font_render("LESSERCO", 36, "Collect dictionaries (stars)", color.by_name["red"])
             screen.blit(collect_text, (110,450))
+
+        self.allsprites.draw(screen)
 
     def display_key_value(self, screen, position, key, value = ""):
         label = self.res.font_render("LESSERCO", 36, str(key), color.by_name["red"])

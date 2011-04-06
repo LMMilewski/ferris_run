@@ -1,13 +1,18 @@
-class Random:
-    """ Realy poor random number generator. But will help keep the
-    code deterministic
-    """
-    def __init__(self, seed=13):
-        self.seed = seed
 
-    def integer(self, low, high):
-        """ Return a pseudorandom number from interval [low, high]
-        """
-        self.seed *= 65537
-        self.seed %= 3571
-        return self.seed % (high - low + 1) + low
+seed = 0
+
+def init(s=13):
+    global seed
+    seed = s
+
+def integer(low, high):
+    """ Return a pseudorandom number from interval [low, high]
+    """
+    global seed
+    seed *= 65537
+    seed %= 3571
+    return seed % (high - low + 1) + low
+
+def choice(list):
+    return list[integer(0, len(list) - 1)]
+    
