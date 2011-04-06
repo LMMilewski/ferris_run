@@ -218,6 +218,8 @@ class FerrisRunGame(GameState):
         self.points = 0
         self.deaths = 0
 
+        self.stopped = True # the game is not playing right now (characters don't move etc)
+
     def init(self, screen):
         self.set_level(1)
 
@@ -231,6 +233,7 @@ class FerrisRunGame(GameState):
         self.ferris = Ferris(self.cfg, self.res)
         self.director = Director(self.cfg, self.res, self.ferris)
         self.sister = Sister(self.cfg, self.res, self.ferris)
+        self.stopped = True
 
     def go_to_next_level(self):
         self.set_level(self.level_num + 1)
@@ -241,6 +244,9 @@ class FerrisRunGame(GameState):
 
         if self.cfg.print_fps:
             print dt, " ", int(1.0/dt)
+
+        if self.stopped:
+            return
 
         # update all objects
         self.ferris.update(dt)
@@ -267,6 +273,7 @@ class FerrisRunGame(GameState):
 
     def process_event(self, event):
         if event.type == KEYDOWN:
+            self.stopped = False
             if event.key == K_ESCAPE:
                 self.finish()
             if event.key == K_LEFT:
@@ -277,6 +284,8 @@ class FerrisRunGame(GameState):
                 self.ferris.direction = DIR_UP
             if event.key == K_DOWN:
                 self.ferris.direction = DIR_DOWN
+            if event.key == K_p:
+                self.stopped = True
             if event.key == K_1:
                 self.cfg.print_fps = not self.cfg.print_fps
 
@@ -303,6 +312,21 @@ class FerrisRunGame(GameState):
         screen.blit(points_label, (self.cfg.board_size[0]+10, 120))
         points_value = self.res.font_render("LESSERCO", 48, str(self.deaths), color.by_name["red"])
         screen.blit(points_value, (self.cfg.board_size[0]+10, 160))
+
+        if self.stopped:
+            dark = pygame.Surface(self.cfg.screen_resolution).convert_alpha()
+            dark.fill((0,0,0,200))
+            screen.blit(dark, (0,0))
+            stopped_text = self.res.font_render("LESSERCO", 90, "THE GAME IS PAUSED", color.by_name["red"])
+            screen.blit(stopped_text, (110,200))
+            anykey_text = self.res.font_render("LESSERCO", 48, "Please press any key to start", color.by_name["red"])
+            screen.blit(anykey_text, (160,270))
+            arrows_text = self.res.font_render("LESSERCO", 48, "You are in center. Use arrows to move", color.by_name["red"])
+            screen.blit(arrows_text, (110,350))
+            avoid_text = self.res.font_render("LESSERCO", 48, "Avoid cars, director and sister", color.by_name["red"])
+            screen.blit(avoid_text, (110,400))
+            collect_text = self.res.font_render("LESSERCO", 48, "Collect dictionaries (stars)", color.by_name["red"])
+            screen.blit(collect_text, (110,450))
 
 
     def finish(self):

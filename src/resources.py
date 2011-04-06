@@ -106,7 +106,8 @@ class Resources:
         # load 'main.ttf' file)
         # add fonts in format
         # (fontname, fontsize)
-        files = [("LESSERCO",48)]
+        files = [("LESSERCO", 48),
+                 ("LESSERCO", 90)]
         for file in files:
             self.load_font_file(file[0], file[1])
 
