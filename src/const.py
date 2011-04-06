@@ -6,3 +6,11 @@ DIR_STOP                      = 4
 
 ORIGIN_TOP_LEFT               = 4
 ORIGIN_CENTER                 = 5
+
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+UP = (0, -1)
+DOWN = (0, 1)
+
+WIDTH = 800
+HEIGHT = 600
