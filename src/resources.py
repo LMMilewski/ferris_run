@@ -60,7 +60,9 @@ class Resources:
                  "bonus-speed-mini",
                  "bonus-speed-mini-dark",
                  "bonus-slow-mini",
-                 "bonus-slow-mini-dark"]
+                 "bonus-slow-mini-dark",
+                 "bonus-rich-mini",
+                 "bonus-rich-mini-dark"]
         for file in files:
             self.load_animation_file(file)
 

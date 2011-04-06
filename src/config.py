@@ -43,6 +43,7 @@ class Config:
         self.registers_per_level = 9
         self.bonus_duration = 10
         self.bullet_slowdown_factor = 0.5
+        self.rich_mode_multiplier = 3
 
     def __add_path_getter(self, k, v):
             setattr(Config,

@@ -200,7 +200,21 @@ class Register:
         self.cfg = cfg
         self.res = res
         self.sprite = Sprite("register", self.res, 0.25)
-        self.position = (random.integer(20,580), random.integer(20,580))
+
+        while True:
+            position = random.integer(20,580), random.integer(20,580)
+            if position[0] < 20 or position[1] < 20:
+                continue
+            if 160 <= position[0] and position[0] <= 220:
+                continue
+            if 380 <= position[0] and position[0] <= 440:
+                continue
+            if 160 <= position[1] and position[1] <= 220:
+                continue
+            if 380 <= position[1] and position[1] <= 440:
+                continue
+            self.position = position
+            break
 
     def update(self, dt):
         self.sprite.update(dt)
@@ -291,6 +305,7 @@ class FerrisRunGame(GameState):
 
     def init(self, screen):
         self.bullet_time = False
+        self.rich_mode = False
         self.ferris = Ferris(self.cfg, self.res)
         self.set_level(1)
         self.define_possible_bonuses()
@@ -298,7 +313,8 @@ class FerrisRunGame(GameState):
     def define_possible_bonuses(self):
         self.possible_bonuses = [
             [ Bonus(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
-              Bonus(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow")],
+              Bonus(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow"),
+              Bonus(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich")],
             [ ]
             ]
 
@@ -352,7 +368,7 @@ class FerrisRunGame(GameState):
         if aabb_collision(self.ferris.aabb(), self.register.aabb()):
             self.res.sounds_play("collect")
             self.register = Register(self.cfg, self.res)
-            self.points += 100
+            self.points += 100 * (self.cfg.rich_mode_multiplier if self.rich_mode else 1)
             self.registers_left -= 1
             if self.registers_left <= 0:
                 self.go_to_next_level()
@@ -383,6 +399,12 @@ class FerrisRunGame(GameState):
     def bullet_time_off(self):
         self.bullet_time = False
 
+    def rich_mode_on(self):
+        self.rich_mode = True
+
+    def rich_mode_off(self):
+        self.rich_mode = False
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             self.stopped = False
@@ -405,7 +427,8 @@ class FerrisRunGame(GameState):
                 if len(self.bonuses) > 1:
                     self.bonuses[1].activate()
             if event.key == K_3:
-                pass
+                if len(self.bonuses) > 2:
+                    self.bonuses[2].activate()
             if event.key == K_4:
                 pass
             if event.key == K_5:
