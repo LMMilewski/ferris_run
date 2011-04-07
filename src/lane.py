@@ -8,6 +8,7 @@ class Lane:
         self.direction = direction
         self.numberOfCars = numberOfCars
         self.pos = pos
+        self.stopped = False
         
         if direction == const.LEFT or direction == const.RIGHT:
             space = cfg.board_size[0]  
@@ -48,6 +49,8 @@ class Lane:
                          
         
     def changeState(self):
+        if self.stopped:
+            return 
         for trafficLight in self.trafficLights:
             if trafficLight.getState() == traffic_light.YELLOW_BEFORE_GREEN or trafficLight.getState() == traffic_light.RED:
                 return
@@ -64,4 +67,19 @@ class Lane:
             
     def getCars(self):
         return self.cars
+    
+    def stop(self):
+        for trafficLight in self.trafficLights:
+            trafficLight.stop()
+        self.changeState()
+        self.stopped = True
+    
+    def reset(self):
+        for trafficLight in self.trafficLights:
+            trafficLight.reset()
+        self.stopped = False        
+        self.changeState()
+            
+        
+         
         
