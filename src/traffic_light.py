@@ -12,7 +12,7 @@ class TrafficLight(pygame.sprite.Sprite):
     
     SWITCHTIME = 10.0
     
-    def __init__(self, initState):    
+    def __init__(self, initState, stopX, stopY):    
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         self.state = initState
         self.img = {}
@@ -22,6 +22,7 @@ class TrafficLight(pygame.sprite.Sprite):
         self.img[RED] = pygame.image.load(os.path.join('gfx', 'redlight.png'))  
         self.image = self.img[self.state]
         self.rect = self.image.get_rect()  
+        self.stopPoint = (stopX, stopY)
         
         self.time = time.time()
         self.leftBound = 0
@@ -41,7 +42,7 @@ class TrafficLight(pygame.sprite.Sprite):
         self.rect[1] = y
         
     def getPosition(self):
-        return (self.rect[0], self.rect[1])
+        return self.stopPoint
     
     def getSize(self):
         return (0,0)

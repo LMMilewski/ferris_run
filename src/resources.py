@@ -62,7 +62,10 @@ class Resources:
                  "bonus-slow-mini",
                  "bonus-slow-mini-dark",
                  "bonus-rich-mini",
-                 "bonus-rich-mini-dark"]
+                 "bonus-rich-mini-dark",
+                 "redcar-right",
+                 "whitecar-right",
+                 "yellowcar-right"]
         for file in files:
             self.load_animation_file(file)
 
@@ -101,6 +104,18 @@ class Resources:
         self.__blend_animation_with_color("car-down-white", "car-down-green", color.by_name["green"])
         self.__blend_animation_with_color("car-right-white", "car-right-green", color.by_name["green"])
         self.__blend_animation_with_color("car-up-white", "car-up-green", color.by_name["green"])
+        
+        self.__map_animation_frames("redcar-right", "redcar-up",  self.__rotate_image(90))
+        self.__map_animation_frames("redcar-right", "redcar-left", self.__rotate_image(180))
+        self.__map_animation_frames("redcar-right", "redcar-down",    self.__rotate_image(270))        
+        
+        self.__map_animation_frames("whitecar-right", "whitecar-up",  self.__rotate_image(90))
+        self.__map_animation_frames("whitecar-right", "whitecar-left", self.__rotate_image(180))
+        self.__map_animation_frames("whitecar-right", "whitecar-down",    self.__rotate_image(270))   
+        
+        self.__map_animation_frames("yellowcar-right", "yellowcar-up",  self.__rotate_image(90))
+        self.__map_animation_frames("yellowcar-right", "yellowcar-left", self.__rotate_image(180))
+        self.__map_animation_frames("yellowcar-right", "yellowcar-down",    self.__rotate_image(270))   
 
         # use __blend_animation_with_color to change color of the
         # sprite. You can use it for very simple skins

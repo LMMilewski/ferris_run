@@ -159,6 +159,13 @@ class Director:
 
     def aabb(self):
         return self.sprite[self.direction].aabb(self.position)
+    
+    def getPosition(self):
+        return self.sprite[self.direction].getPosition(self.position)
+    
+    def getSize(self):
+        return self.sprite[self.direction].getSize()
+        
 
 class Sister:
     def __init__(self, cfg, res, ferris):
@@ -194,6 +201,12 @@ class Sister:
 
     def aabb(self):
         return self.sprite[self.direction].aabb(self.position)
+    
+    def getPosition(self):
+        return self.sprite[self.direction].getPosition(self.position)
+    
+    def getSize(self):
+        return self.sprite[self.direction].getSize()
 
 class Register:
     def __init__(self, cfg, res):
@@ -272,36 +285,46 @@ class FerrisRunGame(GameState):
 
         self.stopped = True # the game is not playing right now (characters don't move etc)
 
-        self.trafficLights = [TrafficLight(traffic_light.GREEN),
-                              TrafficLight(traffic_light.GREEN),
-                              TrafficLight(traffic_light.GREEN),
-                              TrafficLight(traffic_light.GREEN),
-                              TrafficLight(traffic_light.RED)]
-        self.trafficLights[0].setPosition(170, 160)
+        self.trafficLights = [TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 160, 160),
+                              TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 380, 160),
+                              TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 220, 380),
+                              TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 440, 380),
+                              TrafficLight(traffic_light.YELLOW_BEFORE_RED, 160, 220),
+                              TrafficLight(traffic_light.YELLOW_BEFORE_RED, 160, 440),
+                              TrafficLight(traffic_light.YELLOW_BEFORE_RED, 380, 160),
+                              TrafficLight(traffic_light.YELLOW_BEFORE_RED, 380, 380)]
+        self.trafficLights[0].setPosition(610, 300)
         self.trafficLights[1].setPosition(390, 160)
         self.trafficLights[2].setPosition(220, 300)
         self.trafficLights[3].setPosition(440, 300)
         self.trafficLights[4].setPosition(140, 440)
+        self.trafficLights[6].setPosition(360, 160)
+        self.trafficLights[7].setPosition(360, 380)
 
         crossings =  [(160, 160, 80, 80), (380, 160, 80, 80), (160, 380, 80, 80), (380, 380, 80, 80)]
 
-        self.lanes = [Lane(0.6, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 7, (0, 160), [(160, 160, 80, 80), (380, 160, 80, 80)], self.cfg),
-                 Lane(1, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 5, (0, 180), [(160, 160, 80, 80), (380, 160, 80, 80)], self.cfg),
-                 Lane(2, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 5, (0, 200), [(160, 160, 80, 80), (380, 160, 80, 80)], self.cfg),
-                 Lane(1, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 5, (self.cfg.board_size[0] - 40, 380), [(160, 380, 80, 80), (380, 380, 80, 80)], self.cfg),
-                 Lane(2, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 8, (self.cfg.board_size[0] - 40, 400), [(160, 380, 80, 80), (380, 380, 80, 80)], self.cfg),
-                 Lane(2, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 6, (self.cfg.board_size[0] - 40, 420), [(160, 380, 80, 80), (380, 380, 80, 80)], self.cfg),
-                 Lane(2, [self.trafficLights[4]], const.UP, 6, (160, self.cfg.board_size[1] - 40), [(160, 380, 80, 80), (160, 380, 80, 80)], self.cfg)]
-
+        self.lanes = [Lane(0.5, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 160), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
+                 Lane(1, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 181), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
+                 Lane(0.7, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 202), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
+                 Lane(0.6, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 380), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
+                 Lane(1.2, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 401), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
+                 Lane(0.8, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 422), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
+                 Lane(0.4, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (162, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
+                 Lane(0.8, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (182, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
+                 Lane(0.6, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (203, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
+                 Lane(0.6, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (381, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res),
+                 Lane(1, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (403, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res),
+                 Lane(0.8, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (423, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res)]
         self.cars = []
         for lane in self.lanes:
             self.cars += lane.getCars()
-        self.allsprites = pygame.sprite.RenderPlain(self.cars + self.trafficLights)
+            
+        self.allsprites = pygame.sprite.RenderPlain([self.trafficLights[0]])
 
         self.time = 0
         self.lasttime = 0
         self.timeoffset = [10, 3]
-        self.currentOffset = 0
+        self.currentOffset = 1
 
     def init(self, screen):
         self.bullet_time = False
@@ -321,7 +344,7 @@ class FerrisRunGame(GameState):
     def set_level(self, level_num):
         self.level_num = level_num
         self.reset_level()
-        self.res.music_play("level_background")
+     #   self.res.music_play("level_background")
         self.res.sounds_play("level_start")
         self.registers_left = self.cfg.registers_per_level
 
@@ -342,6 +365,10 @@ class FerrisRunGame(GameState):
             dt *= self.cfg.bullet_slowdown_factor
 
         self.background.update(dt)
+        
+        for car in self.cars:
+            car.update(dt)
+        
         self.hud.update(dt)
 
         if self.cfg.print_fps:
@@ -382,8 +409,13 @@ class FerrisRunGame(GameState):
                 self.deaths += 1
                 self.reset_level()
                 return
+            
+        for car in self.cars:            
+            if aabb_collision(self.director.aabb(), car.aabb()):               
+                car.collision(self.director)
+            if aabb_collision(self.sister.aabb(), car.aabb()):
+                car.collision(self.sister)
 
-        self.allsprites.update()
         self.time += dt
         if self.time > self.lasttime + self.timeoffset[self.currentOffset]:
             self.lasttime = self.time
@@ -392,6 +424,8 @@ class FerrisRunGame(GameState):
                 light.changeState()
             for lane in self.lanes:
                 lane.changeState()
+                
+        self.allsprites.update()                
 
     def bullet_time_on(self):
         self.bullet_time = True
@@ -445,6 +479,9 @@ class FerrisRunGame(GameState):
     def display(self, screen):
         self.background.display(screen, (0,0))
 
+        for car in self.cars:
+            car.display(screen)
+
         self.register.display(screen)
         self.ferris.display(screen)
         self.director.display(screen)
@@ -475,6 +512,7 @@ class FerrisRunGame(GameState):
             screen.blit(text_time_left, (menu_x + 60, bonus_y))
             bonus_y += 50
 
+        self.allsprites.draw(screen)
         # pause menu
         if self.stopped:
             dark = pygame.Surface(self.cfg.screen_resolution).convert_alpha()
@@ -491,7 +529,6 @@ class FerrisRunGame(GameState):
             collect_text = self.res.font_render("LESSERCO", 36, "Collect dictionaries (stars)", color.by_name["red"])
             screen.blit(collect_text, (110,450))
 
-        self.allsprites.draw(screen)
 
     def display_key_value(self, screen, position, key, value = ""):
         label = self.res.font_render("LESSERCO", 36, str(key), color.by_name["red"])

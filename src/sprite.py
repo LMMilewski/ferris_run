@@ -41,6 +41,19 @@ class Sprite:
             display_position = (x-w/2, y-h/2)
             screen.blit(img, display_position)
 
+    def getPosition(self, position):
+        img = self.current_frame()
+        w,h = img.get_size()
+        if self.draw_origin == ORIGIN_TOP_LEFT:
+            x,y = position
+            return (x, y)
+        elif self.draw_origin == ORIGIN_CENTER:
+            x,y = position
+            return (x-w/2, y-h/2)
+        
+    def getSize(self):
+        return self.current_frame().get_size()
+
     def aabb(self, position):
         img = self.current_frame()
         w,h = img.get_size()
