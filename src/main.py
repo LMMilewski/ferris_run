@@ -452,6 +452,16 @@ class FerrisRunGame(GameState):
                 self.ferris.direction = DIR_UP
             if event.key == K_DOWN:
                 self.ferris.direction = DIR_DOWN
+            if event.key == K_s:
+                self.lasttime = self.time
+                self.currentOffset = 1  
+                for lane in self.lanes:
+                    lane.stop()                
+            if event.key == K_r:         
+                self.lasttime = self.time
+                self.currentOffset = 1     
+                for lane in self.lanes:
+                    lane.reset()
             if event.key == K_p:
                 self.stopped = True
             if event.key == K_1:

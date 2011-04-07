@@ -29,6 +29,7 @@ class TrafficLight(pygame.sprite.Sprite):
         self.rightBound = 0
         self.upperBound = 0
         self.bottomBound = 0    
+        self.resetState = initState
     
     def changeState(self):
         self.state = (self.state + 1) % 4
@@ -46,5 +47,11 @@ class TrafficLight(pygame.sprite.Sprite):
     
     def getSize(self):
         return (0,0)
+    
+    def reset(self):
+        self.state = self.resetState
+        
+    def stop(self):
+        self.state = YELLOW_BEFORE_RED
         
     
