@@ -11,8 +11,11 @@ class CopSprite(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self);
         self.x = x;
         self.y = y;
+        scale = 0.3;
+        image_width = 757;
+        image_height = 264;
         self.frame_counter = 0;
-        self.image_original =[pygame.transform.scale(pygame.image.load("../gfx/cop_0.png"), (100, 100)), pygame.transform.scale(pygame.image.load("../gfx/cop_1.png"), (100, 100))];
+        self.image_original =[pygame.transform.scale(pygame.image.load("../gfx/cop_0.png"), (image_width * scale, image_height* scale)), pygame.transform.scale(pygame.image.load("../gfx/cop_1.png"), (image_width * scale, image_height * scale))];
         
     def update(self):
         self.frame_counter +=1;
