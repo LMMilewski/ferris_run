@@ -159,13 +159,13 @@ class Director:
 
     def aabb(self):
         return self.sprite[self.direction].aabb(self.position)
-    
+
     def getPosition(self):
         return self.sprite[self.direction].getPosition(self.position)
-    
+
     def getSize(self):
         return self.sprite[self.direction].getSize()
-        
+
 
 class Sister:
     def __init__(self, cfg, res, ferris):
@@ -201,10 +201,10 @@ class Sister:
 
     def aabb(self):
         return self.sprite[self.direction].aabb(self.position)
-    
+
     def getPosition(self):
         return self.sprite[self.direction].getPosition(self.position)
-    
+
     def getSize(self):
         return self.sprite[self.direction].getSize()
 
@@ -318,7 +318,7 @@ class FerrisRunGame(GameState):
         self.cars = []
         for lane in self.lanes:
             self.cars += lane.getCars()
-            
+
         self.allsprites = pygame.sprite.RenderPlain([self.trafficLights[0]])
 
         self.time = 0
@@ -364,18 +364,18 @@ class FerrisRunGame(GameState):
         if self.bullet_time:
             dt *= self.cfg.bullet_slowdown_factor
 
-        self.background.update(dt)
-        
-        for car in self.cars:
-            car.update(dt)
-        
-        self.hud.update(dt)
-
         if self.cfg.print_fps:
             print dt, " ", int(1.0/dt)
 
         if self.stopped:
             return
+
+        self.background.update(dt)
+
+        for car in self.cars:
+            car.update(dt)
+
+        self.hud.update(dt)
 
         # update all objects
         if self.bullet_time:
@@ -409,9 +409,9 @@ class FerrisRunGame(GameState):
                 self.deaths += 1
                 self.reset_level()
                 return
-            
-        for car in self.cars:            
-            if aabb_collision(self.director.aabb(), car.aabb()):               
+
+        for car in self.cars:
+            if aabb_collision(self.director.aabb(), car.aabb()):
                 car.collision(self.director)
             if aabb_collision(self.sister.aabb(), car.aabb()):
                 car.collision(self.sister)
@@ -424,8 +424,8 @@ class FerrisRunGame(GameState):
                 light.changeState()
             for lane in self.lanes:
                 lane.changeState()
-                
-        self.allsprites.update()                
+
+        self.allsprites.update()
 
     def bullet_time_on(self):
         self.bullet_time = True
