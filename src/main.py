@@ -13,6 +13,7 @@ from sprite import *
 from lane import Lane
 from car import Car
 from traffic_light import TrafficLight
+from cop import Cop
 
 def aabb_collision((minx1, miny1, maxx1, maxy1), (minx2, miny2, maxx2, maxy2)):
     xcollision = (minx1 <= minx2 and minx2 <= maxx1) or ((minx2 <= minx1 and minx1 <= maxx2))
@@ -325,6 +326,7 @@ class FerrisRunGame(GameState):
         self.lasttime = 0
         self.timeoffset = [10, 3]
         self.currentOffset = 1
+        self.cops =[Cop(140, 140, 380, 140)]
 
     def init(self, screen):
         self.bullet_time = False
