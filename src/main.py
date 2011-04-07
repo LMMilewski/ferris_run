@@ -303,7 +303,7 @@ class FerrisRunGame(GameState):
 
         crossings =  [(160, 160, 80, 80), (380, 160, 80, 80), (160, 380, 80, 80), (380, 380, 80, 80)]
 
-        self.lanes = [Lane(5, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 160), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
+        self.lanes = [Lane(50, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 160), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
                  Lane(100, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 181), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
                  Lane(70, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 202), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
                  Lane(60, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 380), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
