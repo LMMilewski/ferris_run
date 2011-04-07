@@ -303,18 +303,18 @@ class FerrisRunGame(GameState):
 
         crossings =  [(160, 160, 80, 80), (380, 160, 80, 80), (160, 380, 80, 80), (380, 380, 80, 80)]
 
-        self.lanes = [Lane(0.5, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 160), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
-                 Lane(1, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 181), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
-                 Lane(0.7, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 202), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
-                 Lane(0.6, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 380), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
-                 Lane(1.2, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 401), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
-                 Lane(0.8, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 422), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
-                 Lane(0.4, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (162, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
-                 Lane(0.8, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (182, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
-                 Lane(0.6, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (203, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
-                 Lane(0.6, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (381, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res),
-                 Lane(1, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (403, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res),
-                 Lane(0.8, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (423, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res)]
+        self.lanes = [Lane(5, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 160), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
+                 Lane(100, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 181), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
+                 Lane(70, [self.trafficLights[0], self.trafficLights[1]], const.RIGHT, 3, (0, 202), [(140, 140, 80, 80), (380, 140, 80, 80)], self.cfg, res),
+                 Lane(60, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 380), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
+                 Lane(120, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 401), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
+                 Lane(80, [self.trafficLights[2], self.trafficLights[3]], const.LEFT, 3, (self.cfg.board_size[0] - 40, 422), [(140, 380, 80, 80), (380, 380, 80, 80)], self.cfg, res),
+                 Lane(40, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (162, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
+                 Lane(80, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (182, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
+                 Lane(60, [self.trafficLights[4], self.trafficLights[5]], const.UP, 3, (203, self.cfg.board_size[1] - 40), [(140, 140, 80, 80), (160, 380, 80, 80)], self.cfg, res),
+                 Lane(60, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (381, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res),
+                 Lane(100, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (403, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res),
+                 Lane(80, [self.trafficLights[6], self.trafficLights[7]], const.DOWN, 3, (423, 0), [(380, 140, 80, 80), (380, 360, 80, 80)], self.cfg, res)]
         self.cars = []
         for lane in self.lanes:
             self.cars += lane.getCars()

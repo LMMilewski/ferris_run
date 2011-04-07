@@ -85,9 +85,9 @@ class Car:
                 self.acceleration = a
             else:
                 self.acceleration = self.sensitivity * a
-        self.velocity = max(0, min(self.maxVelocity, self.velocity + self.acceleration))
-        x = self.position[0] + self.velocity * self.direction[0]
-        y = self.position[1] + self.velocity * self.direction[1]   
+        self.velocity = max(0, min(self.maxVelocity, self.velocity + self.acceleration * dt))
+        x = self.position[0] + self.velocity * self.direction[0] * dt
+        y = self.position[1] + self.velocity * self.direction[1] * dt
         self.setPosition(x, y)
             
     def display(self, screen):
