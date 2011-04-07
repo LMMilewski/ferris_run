@@ -37,7 +37,6 @@ class Resources:
         files = ["level_start",
                  "collect",
                  "die"]
-
         for file in files:
             self.load_sound_file(file)
 

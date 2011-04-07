@@ -40,6 +40,7 @@ class Sprite:
             x,y = position
             display_position = (x-w/2, y-h/2)
             screen.blit(img, display_position)
+
     def getPosition(self, position):
         img = self.current_frame()
         w,h = img.get_size()
