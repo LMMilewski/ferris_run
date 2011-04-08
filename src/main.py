@@ -325,6 +325,7 @@ class FerrisRunGame(GameState):
         self.lasttime = 0
         self.timeoffset = [10, 3]
         self.currentOffset = 1
+        self.last_keys = []
 
     def init(self, screen):
         self.bullet_time = False
@@ -361,11 +362,10 @@ class FerrisRunGame(GameState):
             bonus.reset()
 
     def update(self, dt):
+        self.dt = dt
+
         if self.bullet_time:
             dt *= self.cfg.bullet_slowdown_factor
-
-        if self.cfg.print_fps:
-            print dt, " ", int(1.0/dt)
 
         if self.stopped:
             return
@@ -441,6 +441,10 @@ class FerrisRunGame(GameState):
 
     def process_event(self, event):
         if event.type == KEYDOWN:
+            self.last_keys.append(event.key)
+            self.last_keys = self.last_keys[-len(self.cfg.cheat_sequence):]
+            if self.last_keys == self.cfg.cheat_sequence:
+                self.cfg.cheat_mode = True
             self.stopped = False
             if event.key == K_ESCAPE:
                 self.finish()
@@ -452,39 +456,40 @@ class FerrisRunGame(GameState):
                 self.ferris.direction = DIR_UP
             if event.key == K_DOWN:
                 self.ferris.direction = DIR_DOWN
-            if event.key == K_s:
-                self.lasttime = self.time
-                self.currentOffset = 1  
-                for lane in self.lanes:
-                    lane.stop()                
-            if event.key == K_r:         
-                self.lasttime = self.time
-                self.currentOffset = 1     
-                for lane in self.lanes:
-                    lane.reset()
-            if event.key == K_p:
-                self.stopped = True
-            if event.key == K_1:
-                if len(self.bonuses) > 0:
-                    self.bonuses[0].activate()
-            if event.key == K_2:
-                if len(self.bonuses) > 1:
-                    self.bonuses[1].activate()
-            if event.key == K_3:
-                if len(self.bonuses) > 2:
-                    self.bonuses[2].activate()
-            if event.key == K_4:
-                pass
-            if event.key == K_5:
-                pass
-            if event.key == K_7:
-                self.bonuses = self.possible_bonuses[0]
-            if event.key == K_8:
-                self.bonuses = self.possible_bonuses[1]
-            if event.key == K_9:
-                self.go_to_next_level()
-            if event.key ==K_0:
-                self.cfg.print_fps = not self.cfg.print_fps
+                if event.key == K_p:
+                    self.stopped = True
+                if event.key == K_1:
+                    if len(self.bonuses) > 0:
+                        self.bonuses[0].activate()
+                if event.key == K_2:
+                    if len(self.bonuses) > 1:
+                        self.bonuses[1].activate()
+                if event.key == K_3:
+                    if len(self.bonuses) > 2:
+                        self.bonuses[2].activate()
+                if event.key == K_4:
+                    pass
+                if event.key == K_5:
+                    pass
+            if self.cfg.cheat_mode:
+                if event.key == K_s:
+                    self.lasttime = self.time
+                    self.currentOffset = 1
+                    for lane in self.lanes:
+                        lane.stop()
+                if event.key == K_r:
+                    self.lasttime = self.time
+                    self.currentOffset = 1
+                    for lane in self.lanes:
+                        lane.reset()
+                if event.key == K_7:
+                    self.bonuses = self.possible_bonuses[0]
+                if event.key == K_8:
+                    self.bonuses = self.possible_bonuses[1]
+                if event.key == K_9:
+                    self.go_to_next_level()
+                if event.key == K_0:
+                    self.cfg.print_fps = not self.cfg.print_fps
 
     def display(self, screen):
         self.background.display(screen, (0,0))
@@ -518,7 +523,7 @@ class FerrisRunGame(GameState):
                 bonus.sprite_dark.display(screen, (self.cfg.board_size[0]+10, bonus_y))
             else:
                 bonus.sprite.display(screen, (self.cfg.board_size[0]+10, bonus_y))
-            text_time_left = self.res.font_render("LESSERCO", 36, str(bonus.time_left), color.by_name["red"])
+            text_time_left = self.res.font_render("LESSERCO", 36, str(bonus.time_left)+"s", color.by_name["red"])
             screen.blit(text_time_left, (menu_x + 60, bonus_y))
             bonus_y += 50
 
@@ -539,6 +544,12 @@ class FerrisRunGame(GameState):
             collect_text = self.res.font_render("LESSERCO", 36, "Collect dictionaries (stars)", color.by_name["red"])
             screen.blit(collect_text, (110,450))
 
+        if self.cfg.print_fps:
+            self.display_key_value(screen, (0,0), "DT / FPS",  str(self.dt) + " / " + str(int(1.0/self.dt)))
+            print self.dt, " ", int(1.0/self.dt)
+
+        if self.cfg.cheat_mode:
+            self.display_key_value(screen, (300, 550), "!!! CHEATER !!!", "")
 
     def display_key_value(self, screen, position, key, value = ""):
         label = self.res.font_render("LESSERCO", 36, str(key), color.by_name["red"])
@@ -557,6 +568,6 @@ def main():
     fsm = GameFsm(cfg)
     res = Resources(cfg).load_all()
     fsm.set_state(FerrisRunGame(cfg,res))
-    pygame.display.set_caption("Ferris Run")
+    pygame.display.set_caption(cfg.app_name)
     pygame.mouse.set_visible(not cfg.fullscreen)
     fsm.run()

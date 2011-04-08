@@ -9,6 +9,7 @@ It provides public access to its fields, so:
     game will work unexpectedly
 """
 import os, sys
+from pygame.locals import *
 
 class Config:
     def __init__(self):
@@ -19,6 +20,7 @@ class Config:
         self.screen_resolution = 800,600 # just before swap buffers the screen is scaled to this resolution
         self.fullscreen = "--fullscreen" in sys.argv
         self.fps_limit = 60
+        self.app_name = "Ferris Run"
 
         self.print_fps = False
 
@@ -44,6 +46,8 @@ class Config:
         self.bonus_duration = 10
         self.bullet_slowdown_factor = 0.5
         self.rich_mode_multiplier = 2
+        self.cheat_mode = '--cheatmode' in sys.argv
+        self.cheat_sequence = [K_UP, K_UP, K_DOWN, K_DOWN, K_LEFT, K_RIGHT, K_LEFT, K_RIGHT, K_a, K_b]
 
     def __add_path_getter(self, k, v):
             setattr(Config,
