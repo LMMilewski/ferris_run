@@ -291,6 +291,8 @@ class FerrisRunGame(GameState):
 
         self.stopped = True # the game is not playing right now (characters don't move etc)
 
+        self.answer = Sprite("answer", self.res)
+
         self.trafficLights = [TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 160, 160),
                               TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 380, 160),
                               TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 220, 380),
@@ -449,7 +451,7 @@ class FerrisRunGame(GameState):
     def process_event(self, event):
         if event.type == KEYDOWN:
             self.last_keys.append(event.key)
-            self.last_keys = self.last_keys[-50:]
+            self.last_keys = self.last_keys[-100:]
             if self.last_keys[-len(self.cfg.cheat_sequence):] == self.cfg.cheat_sequence:
                 self.cfg.cheat_mode = True
             if self.cfg.cheat_mode:
@@ -461,6 +463,10 @@ class FerrisRunGame(GameState):
                     self.cfg.infinite_bonus = True
                     for bonus in self.bonuses:
                         bonus.unfinish()
+                if self.last_keys[-len(self.cfg.answer_sequence):] == self.cfg.answer_sequence:
+                    self.cfg.answer = True
+            if event.key == K_p:
+                self.stopped = True
             self.stopped = False
             if event.key == K_ESCAPE:
                 self.finish()
@@ -472,8 +478,6 @@ class FerrisRunGame(GameState):
                 self.ferris.direction = DIR_UP
             if event.key == K_DOWN:
                 self.ferris.direction = DIR_DOWN
-            if event.key == K_p:
-                self.stopped = True
             if event.key == K_1:
                 if len(self.bonuses) > 0:
                     self.bonuses[0].activate()
@@ -560,9 +564,11 @@ class FerrisRunGame(GameState):
             collect_text = self.res.font_render("LESSERCO", 36, "Collect dictionaries (stars)", color.by_name["red"])
             screen.blit(collect_text, (110,450))
 
+        if self.cfg.answer:
+            self.answer.display(screen, (350,350))
+
         if self.cfg.print_fps:
             self.display_key_value(screen, (0,0), "DT / FPS",  str(self.dt) + " / " + str(int(1.0/self.dt)))
-            print self.dt, " ", int(1.0/self.dt)
 
         if self.cfg.cheat_mode:
             self.display_key_value(screen, (300, 550), "!!! CHEATER !!!", "")

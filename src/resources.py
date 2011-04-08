@@ -65,7 +65,8 @@ class Resources:
                  "bonus-rich-mini-dark",
                  "redcar-right",
                  "whitecar-right",
-                 "yellowcar-right"]
+                 "yellowcar-right",
+                 "answer"]
         for file in files:
             self.load_animation_file(file)
 

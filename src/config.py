@@ -53,6 +53,8 @@ class Config:
         self.godmode_sequence2 = [K_g, K_o, K_d] # + cheat_mode enabled
         self.infinite_bonus = False
         self.infinite_bonus_sequence = [K_d, K_n, K_k, K_r, K_o, K_z] # + cheat_mode enabled
+        self.answer = False
+        self.answer_sequence = [K_a, K_n, K_s, K_w, K_e, K_r, K_t, K_o, K_l, K_i, K_f, K_e, K_u, K_n, K_i, K_v, K_e, K_r, K_s, K_e, K_a, K_n, K_d, K_e, K_v, K_e, K_r, K_y, K_t, K_h, K_i, K_n, K_g] # + cheat_mode enabled
 
     def __add_path_getter(self, k, v):
             setattr(Config,
