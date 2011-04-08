@@ -160,10 +160,14 @@ class Director:
         self.speed = self.cfg.director_speed
         self.position = (500,500)
         self.target = None
+        self.flee = False
 
     def update(self, dt):
         self.sprite[self.direction].update(dt)
-        self.target = self.ferris.position
+        if self.flee:
+            self.target = (500, 500)
+        else:
+            self.target = self.ferris.position
         self.direction = direction_to_target(self.position, self.target)
         self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
 
@@ -179,7 +183,6 @@ class Director:
     def getSize(self):
         return self.sprite[self.direction].getSize()
 
-
 class Sister:
     def __init__(self, cfg, res, ferris):
         self.cfg = cfg
@@ -194,15 +197,19 @@ class Sister:
         self.speed = self.cfg.sister_speed
         self.position = (100,100)
         self.target = None
+        self.flee = False
 
     def update(self, dt):
         self.sprite[self.direction].update(dt)
 
-        if distance(self.ferris.position, self.position) < 70:
-            self.target = self.ferris.position
+        if self.flee:
+            self.target = (100,100)
         else:
-            ferris_dir = direction_to_vector(self.ferris.direction)
-            self.target = self.ferris.position[0] + ferris_dir[0] * 80, self.ferris.position[1] + ferris_dir[1] * 80
+            if distance(self.ferris.position, self.position) < 70:
+                self.target = self.ferris.position
+            else:
+                ferris_dir = direction_to_vector(self.ferris.direction)
+                self.target = self.ferris.position[0] + ferris_dir[0] * 80, self.ferris.position[1] + ferris_dir[1] * 80
 
         new_direction = direction_to_target(self.position, self.target)
         if new_direction != (self.direction + 2) % 4: # can't reverse direction
@@ -357,7 +364,8 @@ class FerrisRunGame(GameState):
         self.possible_bonuses = [
             [ Bonus(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
               Bonus(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow"),
-              Bonus(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich")],
+              Bonus(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
+              Bonus(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"), ],
             [ ]
             ]
 
@@ -468,6 +476,14 @@ class FerrisRunGame(GameState):
     def rich_mode_off(self):
         self.rich_mode = False
 
+    def enemies_flee_on(self):
+        self.director.flee = True
+        self.sister.flee = True
+
+    def enemies_flee_off(self):
+        self.director.flee = False
+        self.sister.flee = False
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             self.last_keys.append(event.key)
@@ -508,7 +524,8 @@ class FerrisRunGame(GameState):
                 if len(self.bonuses) > 2:
                       self.bonuses[2].activate()
             if event.key == K_4:
-                pass
+                if len(self.bonuses) > 3:
+                    self.bonuses[3].activate()
             if event.key == K_5:
                  pass
             if self.cfg.cheat_mode:

@@ -63,6 +63,8 @@ class Resources:
                  "bonus-slow-mini-dark",
                  "bonus-rich-mini",
                  "bonus-rich-mini-dark",
+                 "bonus-enemies-flee-mini",
+                 "bonus-enemies-flee-mini-dark",
                  "redcar-right",
                  "whitecar-right",
                  "yellowcar-right",
