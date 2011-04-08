@@ -11,11 +11,11 @@ class CopSprite(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self);
         self.x = x;
         self.y = y;
-        scale = 0.3;
-        image_width = 757;
-        image_height = 264;
+        scale = 0.1;
+        image_width = 978;
+        image_height = 1194;
         self.frame_counter = 0;
-        self.image_original =[pygame.transform.scale(pygame.image.load("../gfx/cop_0.png"), (image_width * scale, image_height* scale)), pygame.transform.scale(pygame.image.load("../gfx/cop_1.png"), (image_width * scale, image_height * scale))];
+        self.image_original =[pygame.transform.scale(pygame.image.load("gfx/cop_0.png"), (int(image_width * scale), int(image_height* scale))), pygame.transform.scale(pygame.image.load("gfx/cop_1.png"), (int(image_width * scale), int(image_height * scale)))];
         
     def update(self):
         self.frame_counter +=1;
@@ -41,6 +41,8 @@ class Cop():
         self.rotation_speed = 30;
         self.path_length = direction_length;
         self.destination_angle = math.degrees(math.acos(self.direction[0]));
+        self.ray_length = 60;
+        self.ray_angle = 180;
 
         if (math.copysign(1, self.direction[1]) != math.copysign(1, math.sin(self.destination_angle))):
             self.destination_angle = 360 - self.destination_angle;
@@ -60,7 +62,16 @@ class Cop():
     def GetSprite(self):
         return self.cop_sprite;
     
-    def update(self, dt):
+    def update(self, dt, ferris_position):
+        cop_to_ferris_distance = pow(pow(self.x - ferris_position[0], 2) + pow(self.y - ferris_position[1], 2), 0.5)
+        if (cop_to_ferris_distance <= self.ray_length):
+            ferris_position_cop_dependent = (ferris_position[0] - self.x, ferris_position[1] - self.y);
+            dot_product = ferris_position_cop_dependent[0]*self.direction[0] + ferris_position_cop_dependent[1]*self.direction[1]
+            ferris_cop_angle = math.degrees(math.acos(dot_product/cop_to_ferris_distance));
+            if (ferris_cop_angle <= self.ray_angle/2):
+                return 1;
+        
+        
         if (self.destination_angle != self.angle):
             if (math.fabs(self.destination_angle - self.angle) < dt * self.rotation_speed):
                 self.angle = self.destination_angle;
@@ -83,3 +94,5 @@ class Cop():
                 self.InitMovement(new_start, new_end);
         
         self.cop_sprite.SetPosition(int(self.x), int(self.y), self.angle);
+        
+        return 0;

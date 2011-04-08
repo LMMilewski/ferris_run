@@ -15,7 +15,7 @@ class Config:
         ## general stuff
         self.sound = not "--nosounds" in sys.argv
         self.music = not "--nomusic" in sys.argv
-        self.resolution = 320,240 # in this resolution the game is blited onto Surface
+        self.resolution = 800,600 # in this resolution the game is blited onto Surface
         self.screen_resolution = 800,600 # just before swap buffers the screen is scaled to this resolution
         self.fullscreen = "--fullscreen" in sys.argv
         self.fps_limit = 60
@@ -35,6 +35,7 @@ class Config:
         ### game specyfic options
         self.ferris_speed = 100
         self.ferris_speed_fast = 200
+        self.ferris_speed_cop = 50;
         self.director_speed = 60
         self.sister_speed = 70
         self.car_speed = 120
