@@ -31,7 +31,7 @@ class Config:
             self.__path[data_type] = os.path.join(base_path, data_type)
 
         # you can't inline __add_path_getter method because in python
-        # closures are create by function calls
+        # closures are created by function calls
         for k, v in self.__path.items():
             self.__add_path_getter(k,v)
 
@@ -43,11 +43,16 @@ class Config:
         self.car_speed = 120
         self.board_size = 600,600
         self.registers_per_level = 9
-        self.bonus_duration = 10
+        self.bonus_duration = 2
         self.bullet_slowdown_factor = 0.5
         self.rich_mode_multiplier = 2
         self.cheat_mode = '--cheatmode' in sys.argv
         self.cheat_sequence = [K_UP, K_UP, K_DOWN, K_DOWN, K_LEFT, K_RIGHT, K_LEFT, K_RIGHT, K_a, K_b]
+        self.godmode = False
+        self.godmode_sequence1 = [K_t, K_e, K_r, K_r, K_i, K_b, K_l, K_e, K_t, K_e, K_r, K_r, K_i, K_b, K_l, K_e, K_d, K_a, K_m, K_a, K_g, K_e] # + cheat_mode enabled
+        self.godmode_sequence2 = [K_g, K_o, K_d] # + cheat_mode enabled
+        self.infinite_bonus = False
+        self.infinite_bonus_sequence = [K_d, K_n, K_k, K_r, K_o, K_z] # + cheat_mode enabled
 
     def __add_path_getter(self, k, v):
             setattr(Config,

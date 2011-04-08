@@ -79,6 +79,10 @@ class Bonus:
         self.sprite_dark = Sprite(name + "-mini-dark", self.res, None, ORIGIN_TOP_LEFT)
         self.reset()
 
+    def unfinish(self):
+        self.finished = False
+        self.time_left = self.cfg.bonus_duration
+
     def activate(self):
         self.active = True
         self.command()
@@ -88,6 +92,8 @@ class Bonus:
         self.active = False
         self.undo_command()
         self.time_left = 0
+        if self.cfg.infinite_bonus:
+            self.unfinish()
 
     def update(self, dt):
         if self.active:
@@ -402,13 +408,14 @@ class FerrisRunGame(GameState):
                 return
 
         # check collision with enemies
-        enemies = [self.director, self.sister] + self.cars
-        for enemy in enemies:
-            if aabb_collision(self.ferris.aabb(), enemy.aabb()):
-                self.res.sounds_play("die")
-                self.deaths += 1
-                self.reset_level()
-                return
+        if not self.cfg.godmode:
+            enemies = [self.director, self.sister] + self.cars
+            for enemy in enemies:
+                if aabb_collision(self.ferris.aabb(), enemy.aabb()):
+                    self.res.sounds_play("die")
+                    self.deaths += 1
+                    self.reset_level()
+                    return
 
         for car in self.cars:
             if aabb_collision(self.director.aabb(), car.aabb()):
@@ -442,9 +449,18 @@ class FerrisRunGame(GameState):
     def process_event(self, event):
         if event.type == KEYDOWN:
             self.last_keys.append(event.key)
-            self.last_keys = self.last_keys[-len(self.cfg.cheat_sequence):]
-            if self.last_keys == self.cfg.cheat_sequence:
+            self.last_keys = self.last_keys[-50:]
+            if self.last_keys[-len(self.cfg.cheat_sequence):] == self.cfg.cheat_sequence:
                 self.cfg.cheat_mode = True
+            if self.cfg.cheat_mode:
+                if self.last_keys[-len(self.cfg.godmode_sequence1):] == self.cfg.godmode_sequence1:
+                    self.cfg.godmode = True
+                if self.last_keys[-len(self.cfg.godmode_sequence2):] == self.cfg.godmode_sequence2:
+                    self.cfg.godmode = True
+                if self.last_keys[-len(self.cfg.infinite_bonus_sequence):] == self.cfg.infinite_bonus_sequence:
+                    self.cfg.infinite_bonus = True
+                    for bonus in self.bonuses:
+                        bonus.unfinish()
             self.stopped = False
             if event.key == K_ESCAPE:
                 self.finish()
@@ -456,21 +472,21 @@ class FerrisRunGame(GameState):
                 self.ferris.direction = DIR_UP
             if event.key == K_DOWN:
                 self.ferris.direction = DIR_DOWN
-                if event.key == K_p:
-                    self.stopped = True
-                if event.key == K_1:
-                    if len(self.bonuses) > 0:
-                        self.bonuses[0].activate()
-                if event.key == K_2:
-                    if len(self.bonuses) > 1:
-                        self.bonuses[1].activate()
-                if event.key == K_3:
-                    if len(self.bonuses) > 2:
-                        self.bonuses[2].activate()
-                if event.key == K_4:
-                    pass
-                if event.key == K_5:
-                    pass
+            if event.key == K_p:
+                self.stopped = True
+            if event.key == K_1:
+                if len(self.bonuses) > 0:
+                    self.bonuses[0].activate()
+            if event.key == K_2:
+                if len(self.bonuses) > 1:
+                    self.bonuses[1].activate()
+            if event.key == K_3:
+                if len(self.bonuses) > 2:
+                      self.bonuses[2].activate()
+            if event.key == K_4:
+                pass
+            if event.key == K_5:
+                 pass
             if self.cfg.cheat_mode:
                 if event.key == K_s:
                     self.lasttime = self.time
