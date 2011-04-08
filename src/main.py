@@ -365,7 +365,8 @@ class FerrisRunGame(GameState):
             [ Bonus(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
               Bonus(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow"),
               Bonus(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
-              Bonus(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"), ],
+              Bonus(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"),
+              Bonus(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"), ],
             [ ]
             ]
 
@@ -484,6 +485,18 @@ class FerrisRunGame(GameState):
         self.director.flee = False
         self.sister.flee = False
 
+    def lights_crash_on(self):
+        self.lasttime = self.time
+        self.currentOffset = 1
+        for lane in self.lanes:
+            lane.stop()
+
+    def lights_crash_off(self):
+        self.lasttime = self.time
+        self.currentOffset = 1
+        for lane in self.lanes:
+            lane.reset()
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             self.last_keys.append(event.key)
@@ -527,18 +540,9 @@ class FerrisRunGame(GameState):
                 if len(self.bonuses) > 3:
                     self.bonuses[3].activate()
             if event.key == K_5:
-                 pass
+                if len(self.bonuses) > 4:
+                    self.bonuses[4].activate()
             if self.cfg.cheat_mode:
-                if event.key == K_s:
-                    self.lasttime = self.time
-                    self.currentOffset = 1
-                    for lane in self.lanes:
-                        lane.stop()
-                if event.key == K_r:
-                    self.lasttime = self.time
-                    self.currentOffset = 1
-                    for lane in self.lanes:
-                        lane.reset()
                 if event.key == K_7:
                     self.bonuses = self.possible_bonuses[0]
                 if event.key == K_8:

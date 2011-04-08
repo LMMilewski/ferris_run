@@ -65,6 +65,8 @@ class Resources:
                  "bonus-rich-mini-dark",
                  "bonus-enemies-flee-mini",
                  "bonus-enemies-flee-mini-dark",
+                 "bonus-lights-mini",
+                 "bonus-lights-mini-dark",
                  "redcar-right",
                  "whitecar-right",
                  "yellowcar-right",
