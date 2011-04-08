@@ -1,7 +1,7 @@
 
 seed = 0
 
-def init(s=13):
+def init(s=1337):
     global seed
     seed = s
 

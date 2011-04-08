@@ -70,7 +70,7 @@ def get_next_position(cfg, position, direction, dt, speed):
     return px, py
 
 
-class Bonus:
+class BonusWithTimer:
     def __init__(self, cfg, res, command, undo_command, name):
         self.cfg = cfg
         self.res = res
@@ -79,10 +79,7 @@ class Bonus:
         self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
         self.sprite_dark = Sprite(name + "-mini-dark", self.res, None, ORIGIN_TOP_LEFT)
         self.reset()
-
-    def unfinish(self):
-        self.finished = False
-        self.time_left = self.cfg.bonus_duration
+        self.type = "timer"
 
     def activate(self):
         self.active = True
@@ -94,7 +91,7 @@ class Bonus:
         self.undo_command()
         self.time_left = 0
         if self.cfg.infinite_bonus:
-            self.unfinish()
+            self.reset()
 
     def update(self, dt):
         if self.active:
@@ -106,6 +103,36 @@ class Bonus:
         self.active = False
         self.time_left = self.cfg.bonus_duration
         self.finished = False
+
+class BonusWithCounter:
+    def __init__(self, cfg, res, command, name):
+        self.cfg = cfg
+        self.res = res
+        self.command = command
+        self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
+        self.sprite_dark = Sprite(name + "-mini-dark", self.res, None, ORIGIN_TOP_LEFT)
+        self.reset()
+        self.active = False
+        self.type = "counter"
+
+    def activate(self):
+        if self.count_left > 0:
+            self.command()
+            if not self.cfg.infinite_bonus:
+                self.count_left -= 1
+            if self.count_left == 0:
+                self.finished = True
+
+    def deactivate(self):
+        pass
+
+    def update(self, dt):
+        pass
+
+    def reset(self):
+        self.count_left = self.cfg.bonus_count
+        self.finished = False
+
 
 class Ferris:
     def __init__(self, cfg, res):
@@ -362,12 +389,12 @@ class FerrisRunGame(GameState):
 
     def define_possible_bonuses(self):
         self.possible_bonuses = [
-            [ Bonus(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
-              Bonus(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow"),
-              Bonus(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
-              Bonus(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"),
-              Bonus(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"), ],
-            [ ]
+            [ BonusWithTimer(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
+              BonusWithTimer(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow"),
+              BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
+              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"),
+              BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"), ],
+            [ BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"), ]
             ]
 
     def set_level(self, level_num):
@@ -386,7 +413,6 @@ class FerrisRunGame(GameState):
     def go_to_next_level(self):
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
-            bonus.deactivate()
             bonus.reset()
 
     def update(self, dt):
@@ -428,16 +454,6 @@ class FerrisRunGame(GameState):
             else:
                 bonus.update(dt)
 
-        # check collision with register
-        if aabb_collision(self.ferris.aabb(), self.register.aabb()):
-            self.res.sounds_play("collect")
-            self.register = Register(self.cfg, self.res)
-            self.points += 100 * (self.cfg.rich_mode_multiplier if self.rich_mode else 1)
-            self.registers_left -= 1
-            if self.registers_left <= 0:
-                self.go_to_next_level()
-                return
-
         # check collision with enemies
         if not self.cfg.godmode:
             enemies = [self.director, self.sister] + self.cars
@@ -448,6 +464,11 @@ class FerrisRunGame(GameState):
                     self.reset_level()
                     return
 
+        # check collision with register
+        if aabb_collision(self.ferris.aabb(), self.register.aabb()):
+            self.pick_register()
+
+        # check collision with enemies
         for car in self.cars:
             if aabb_collision(self.director.aabb(), car.aabb()):
                 car.collision(self.director)
@@ -497,6 +518,14 @@ class FerrisRunGame(GameState):
         for lane in self.lanes:
             lane.reset()
 
+    def pick_register(self):
+        self.res.sounds_play("collect")
+        self.register = Register(self.cfg, self.res)
+        self.points += 100 * (self.cfg.rich_mode_multiplier if self.rich_mode else 1)
+        self.registers_left -= 1
+        if self.registers_left <= 0:
+            self.go_to_next_level()
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             self.last_keys.append(event.key)
@@ -511,7 +540,7 @@ class FerrisRunGame(GameState):
                 if self.last_keys[-len(self.cfg.infinite_bonus_sequence):] == self.cfg.infinite_bonus_sequence:
                     self.cfg.infinite_bonus = True
                     for bonus in self.bonuses:
-                        bonus.unfinish()
+                        bonus.reset()
                 if self.last_keys[-len(self.cfg.answer_sequence):] == self.cfg.answer_sequence:
                     self.cfg.answer = True
             if event.key == K_p:
@@ -584,10 +613,15 @@ class FerrisRunGame(GameState):
                 bonus.sprite_dark.display(screen, (self.cfg.board_size[0]+10, bonus_y))
             else:
                 bonus.sprite.display(screen, (self.cfg.board_size[0]+10, bonus_y))
-            text_time_left = self.res.font_render("LESSERCO", 36, str(bonus.time_left)+"s", color.by_name["red"])
+
+            if bonus.type == "timer":
+                text_time_left = self.res.font_render("LESSERCO", 36, str(bonus.time_left)+"s", color.by_name["red"])
+            elif bonus.type == "counter":
+                text_time_left = self.res.font_render("LESSERCO", 36, " x " + str(bonus.count_left), color.by_name["red"])
             screen.blit(text_time_left, (menu_x + 60, bonus_y))
+
             bonus_y += 50
-        
+
         self.cop_sprites.update();
         self.cop_sprites.draw(screen);
 
