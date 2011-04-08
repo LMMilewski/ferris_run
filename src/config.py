@@ -34,10 +34,10 @@ class Config:
         # closures are created by function calls
         for k, v in self.__path.items():
             self.__add_path_getter(k,v)
-
         ### game specyfic options
         self.ferris_speed = 100
         self.ferris_speed_fast = 200
+        self.ferris_speed_cop = 50;
         self.director_speed = 60
         self.sister_speed = 70
         self.car_speed = 120

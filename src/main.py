@@ -13,6 +13,7 @@ from sprite import *
 from lane import Lane
 from car import Car
 from traffic_light import TrafficLight
+from cop import Cop, CopSprite
 
 def aabb_collision((minx1, miny1, maxx1, maxy1), (minx2, miny2, maxx2, maxy2)):
     xcollision = (minx1 <= minx2 and minx2 <= maxx1) or ((minx2 <= minx1 and minx1 <= maxx2))
@@ -137,6 +138,12 @@ class Ferris:
 
     def set_speed_fast(self):
         self.speed = self.cfg.ferris_speed_fast
+    
+    def set_speed_cop_watch(self):
+        self.speed = self.cfg.ferris_speed_cop
+    
+    def get_position(self):
+        return self.position;
 
 # should refactor? the code is the same as Ferris's and other guys
 class Director:
@@ -334,6 +341,10 @@ class FerrisRunGame(GameState):
         self.timeoffset = [10, 3]
         self.currentOffset = 1
         self.last_keys = []
+        self.cops = [Cop(260, 170, 390, 170)]
+        self.cop_sprites = pygame.sprite.Group()
+        for cop in self.cops:
+            self.cop_sprites.add(cop.GetSprite());
 
     def init(self, screen):
         self.bullet_time = False
@@ -382,6 +393,15 @@ class FerrisRunGame(GameState):
 
         for car in self.cars:
             car.update(dt)
+
+        no_of_cops_seeing_ferris = 0;
+        for cop in self.cops:
+            no_of_cops_seeing_ferris += cop.update(dt, self.ferris.get_position());
+
+        if no_of_cops_seeing_ferris > 0:
+            self.ferris.set_speed_cop_watch();
+        else:
+            self.ferris.set_speed_normal();
 
         self.hud.update(dt)
 
@@ -546,6 +566,9 @@ class FerrisRunGame(GameState):
             text_time_left = self.res.font_render("LESSERCO", 36, str(bonus.time_left)+"s", color.by_name["red"])
             screen.blit(text_time_left, (menu_x + 60, bonus_y))
             bonus_y += 50
+        
+        self.cop_sprites.update();
+        self.cop_sprites.draw(screen);
 
         self.allsprites.draw(screen)
         # pause menu
