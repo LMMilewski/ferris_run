@@ -194,7 +194,7 @@ class Ferris:
         return self.sprite[self.direction].aabb(self.position)
 
     def reset(self):
-        self.position = (300,300)
+        self.position = (300,250)
         self.direction = DIR_LEFT
 
     def set_speed_normal(self):
@@ -390,13 +390,15 @@ class FerrisRunGame(GameState):
                               TrafficLight(traffic_light.YELLOW_BEFORE_RED, 160, 440),
                               TrafficLight(traffic_light.YELLOW_BEFORE_RED, 380, 160),
                               TrafficLight(traffic_light.YELLOW_BEFORE_RED, 380, 380)]
-        self.trafficLights[0].setPosition(610, 300)
-        self.trafficLights[1].setPosition(390, 160)
-        self.trafficLights[2].setPosition(220, 300)
-        self.trafficLights[3].setPosition(440, 300)
-        self.trafficLights[4].setPosition(140, 440)
-        self.trafficLights[6].setPosition(360, 160)
-        self.trafficLights[7].setPosition(360, 380)
+        for i in range(8):
+            self.trafficLights[i].setPosition(290,270)
+        # self.trafficLights[0].setPosition(610, 300)
+        # self.trafficLights[1].setPosition(390, 160)
+        # self.trafficLights[2].setPosition(220, 300)
+        # self.trafficLights[3].setPosition(440, 300)
+        # self.trafficLights[4].setPosition(140, 440)
+        # self.trafficLights[6].setPosition(360, 160)
+        # self.trafficLights[7].setPosition(360, 380)
 
         crossings =  [(160, 160, 80, 80), (380, 160, 80, 80), (160, 380, 80, 80), (380, 380, 80, 80)]
 
