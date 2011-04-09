@@ -15,7 +15,7 @@ class CopSprite(pygame.sprite.Sprite):
         image_width = 978;
         image_height = 1194;
         self.frame_counter = 0;
-        self.image_original =[pygame.transform.scale(pygame.image.load("gfx/cop_0.png"), (int(image_width * scale), int(image_height* scale))), pygame.transform.scale(pygame.image.load("gfx/cop_1.png"), (int(image_width * scale), int(image_height * scale)))];
+        self.image_original =[pygame.transform.scale(pygame.image.load("gfx/cop0.png"), (int(image_width * scale), int(image_height* scale)))];
 
     def update(self):
         self.frame_counter +=1;

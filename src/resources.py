@@ -281,4 +281,4 @@ class Resources:
         
     def __sort_highscores(self):
         self.highscores.sort(cmp=None, key=lambda entry: entry['deaths'], reverse=False) 
-        self.highscores.sort(cmp=None, key=lambda entry: entry['points'], reverse=False)        
+        self.highscores.sort(cmp=None, key=lambda entry: entry['points'], reverse=True)        

@@ -475,7 +475,6 @@ class EnterHighscores(Highscores):
                 if keyPress >= 32 and keyPress <= 126 and len(self.entry["name"]) <= self.cfg.nick_length:
                     self.entry["name"] += chr(keyPress)
 
-
     def is_finished(self):
         return self.finished
 
@@ -946,7 +945,7 @@ def main():
     fsm = GameFsm(cfg)
     res = Resources(cfg).load_all()
     pygame.display.set_caption(cfg.app_name)
-    game_state = MainMenu(cfg,res, fsm)
+    game_state = MainMenu(cfg,res,fsm)
     fsm.set_state(game_state)
     fsm.run()
     res.save_highscores()
