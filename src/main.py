@@ -347,6 +347,8 @@ class FerrisRunGame(GameState):
         self.points = 0
         self.deaths = 0
         self.bonuses = []
+        self.blood_sprite = Sprite("blood", self.res)
+        self.blood_positions = []
 
         self.stopped = True # the game is not playing right now (characters don't move etc)
 
@@ -430,11 +432,13 @@ class FerrisRunGame(GameState):
         self.stopped = True
 
     def go_to_next_level(self):
+        self.blood_positions = []
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
             bonus.reset()
 
     def die(self):
+        self.blood_positions.append(self.ferris.position)
         self.res.sounds_play("die")
         self.deaths += 1
         self.reset_level()
@@ -608,6 +612,9 @@ class FerrisRunGame(GameState):
 
     def display(self, screen):
         self.background.display(screen, (0,0))
+
+        for blood_position in self.blood_positions:
+            self.blood_sprite.display(screen, blood_position)
 
         for car in self.cars:
             car.display(screen)

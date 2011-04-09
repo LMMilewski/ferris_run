@@ -72,7 +72,8 @@ class Resources:
                  "redcar-right",
                  "whitecar-right",
                  "yellowcar-right",
-                 "answer"]
+                 "answer",
+                 "blood"]
         for file in files:
             self.load_animation_file(file)
 
