@@ -355,7 +355,7 @@ class Register:
         return self.sprite.aabb(self.position)
 
 class MainMenu(GameState):
-    def __init__(self, cfg, res):
+    def __init__(self, cfg, res, fsm):
         self.cfg = cfg
         self.res = res
         self.logo = Sprite("logo", self.res, None, ORIGIN_TOP_LEFT)
@@ -366,6 +366,7 @@ class MainMenu(GameState):
         self.highscores = [Sprite("highscores1", self.res, None, ORIGIN_TOP_LEFT), Sprite("highscores0", self.res, None, ORIGIN_TOP_LEFT)]
         self.menuPosition = 0
         self.finished = False
+        self.fsm = fsm
 
     def update(self, dt):
         for person in self.sprites:
@@ -388,7 +389,7 @@ class MainMenu(GameState):
 
     def next_state(self):
         if self.menuPosition == 0:
-            return FerrisRunGame(self.cfg, self.res)
+            return FerrisRunGame(self.cfg, self.res, self.fsm)
         else:
             return Highscores(self.cfg, self.res)
 
@@ -875,6 +876,6 @@ def main():
     fsm = GameFsm(cfg)
     res = Resources(cfg).load_all()
     pygame.display.set_caption(cfg.app_name)
-    game_state = MainMenu(cfg,res)
+    game_state = MainMenu(cfg,res,fsm)
     fsm.set_state(game_state)
     fsm.run()
