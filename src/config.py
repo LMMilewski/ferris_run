@@ -35,7 +35,9 @@ class Config:
         # closures are created by function calls
         for k, v in self.__path.items():
             self.__add_path_getter(k,v)
+
         ### game specyfic options
+        self.game_speed_multipliers = [0, 0.8, 0.9, 0.9, 1.0, 1.0, 1.1, 1.3, 1.5, 1.7]
         self.ferris_speed = 100
         self.ferris_speed_fast = 200
         self.cop_slowdown_multiplier = 0.5

@@ -578,6 +578,8 @@ class FerrisRunGame(GameState):
         self.reset_level()
 
     def update(self, dt):
+        dt *= self.cfg.game_speed_multipliers[self.level_num]
+
         self.dt = dt
 
         if self.bullet_time:
