@@ -537,7 +537,7 @@ class FerrisRunGame(GameState):
         self.possible_bonuses = [
             [ BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich", "Registeres give more points"),
               BonusWithTimer(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed", "Ferris moves much faster"),
-              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee", "Sen enemies to their startpoints"),
+              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee", "Send enemies to their startpoints"),
               BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick", "Instantaneously pick the register"), ],
 
             [ BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights", "Traffic lights go red"),
