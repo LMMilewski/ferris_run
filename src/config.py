@@ -61,6 +61,7 @@ class Config:
         self.highscore_entries = 10
         self.highscore_delimiter = "-"
         self.highscore_entry_delimiter = "|"
+        self.nick_length = 6
 
     def __add_path_getter(self, k, v):
             setattr(Config,

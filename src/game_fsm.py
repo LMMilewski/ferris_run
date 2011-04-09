@@ -99,3 +99,4 @@ class GameFsm:
             else:
                 self.video_buffer.blit(self.screen, (0,0))
             pygame.display.flip()
+        

@@ -355,9 +355,10 @@ class Register:
         return self.sprite.aabb(self.position)
 
 class MainMenu(GameState):
-    def __init__(self, cfg, res):
+    def __init__(self, cfg, res, fsm):
         self.cfg = cfg
         self.res = res  
+        self.fsm = fsm
         self.logo = Sprite("logo", self.res, None, ORIGIN_TOP_LEFT)
         self.sprites = [Sprite("sister-right", res, 0.1), Sprite("director-right", res, 0.1), Sprite("ferris-right", res, 0.1)]
         self.positions = [[0, 90], [30, 90], [100, 90]]
@@ -366,6 +367,7 @@ class MainMenu(GameState):
         self.highscores = [Sprite("highscores1", self.res, None, ORIGIN_TOP_LEFT), Sprite("highscores0", self.res, None, ORIGIN_TOP_LEFT)]
         self.menuPosition = 0
         self.finished = False
+        self.exit = False
       
     def update(self, dt):
         for person in self.sprites:
@@ -387,31 +389,35 @@ class MainMenu(GameState):
         self.highscores[1 - self.menuPosition].display(screen, (300, 350))
             
     def next_state(self):
+        if self.exit:
+            return GameState.next_state(self)
         if self.menuPosition == 0:
-            return FerrisRunGame(self.cfg, self.res)    
+            return FerrisRunGame(self.cfg, self.res, self.fsm)    
         else:
-            return Highscores(self.cfg, self.res)
+            return Highscores(self.cfg, self.res, self.fsm)
                     
             
     def process_event(self, event):
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
-                self.finish()
-            if event.key == K_UP:
+                self.exit = True
+                self.finished = True
+            elif event.key == K_UP:
                 self.menuPosition = (self.menuPosition + 1) % 2
-            if event.key == K_DOWN:
+            elif event.key == K_DOWN:
                 self.menuPosition = (self.menuPosition + 1) % 2           
-            if event.key == K_RETURN:
+            elif event.key == K_RETURN:
                 self.finished = True
                 
     def is_finished(self):
-        return self.finished                
+        return self.finished            
 
 
 class Highscores(GameState):
-    def __init__(self, cfg, res):
+    def __init__(self, cfg, res, fsm):
         self.cfg = cfg
         self.res = res  
+        self.fsm = fsm
         self.finished = False
         self.logo = Sprite("highscoreslogo", self.res, None, ORIGIN_TOP_LEFT)
         self.highscores = self.res.get_highscores()            
@@ -428,19 +434,40 @@ class Highscores(GameState):
         label = self.res.font_render("LESSERCO", 36, "name   scores   deaths", color.by_name["black"])
         screen.blit(label, (300, 150))    
         for entry in self.highscores:
-            label = self.res.font_render("LESSERCO", 36, str(i) + "." + entry["name"] + "\t" + entry["points"] + "\t" + entry["deaths"], color.by_name["black"])
+            label = self.res.font_render("LESSERCO", 36, str(i) + "." + entry["name"] + "\t" + str(entry["points"]) + "\t" + str(entry["deaths"]), color.by_name["black"])
             screen.blit(label, (300, position))    
             position += 30
             i += 1    
             
     def next_state(self):
-        return MainMenu(self.cfg, self.res)    
+        return MainMenu(self.cfg, self.res, self.fsm)    
                     
             
     def process_event(self, event):
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 self.finished = True
+                      
+    def is_finished(self):
+        return self.finished    
+
+class EnterHighscores(Highscores):
+    def __init__(self, cfg, res, fsm, entry):
+        Highscores.__init__(self, cfg, res, fsm)
+        self.entry = entry
+                    
+            
+    def process_event(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self.finished = True
+            elif event.key == K_RETURN:
+                self.finished = True
+            elif self.entry:
+                keyPress = event.key
+                if keyPress >= 32 and keyPress <= 126 and len(self.entry["name"]) <= self.cfg.nick_length:
+                    self.entry["name"] += chr(keyPress)
+                
                       
     def is_finished(self):
         return self.finished    
@@ -567,6 +594,11 @@ class FerrisRunGame(GameState):
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
             bonus.reset()
+            
+        if self.level_num > 9:
+            entry = self.res.add_highscore(self.points, self.deaths)
+            self.fsm.set_state(EnterHighscores(self.cfg, self.res, self.fsm, entry))            
+            
 
     def die(self):
         self.blood_positions.append(self.ferris.position)
@@ -867,12 +899,14 @@ class FerrisRunGame(GameState):
 
     def is_finished(self):
         return self.__is_finished
+         
 
 def main():
     cfg = Config()
     fsm = GameFsm(cfg)
     res = Resources(cfg).load_all()
     pygame.display.set_caption(cfg.app_name)
-    game_state = MainMenu(cfg,res)
+    game_state = MainMenu(cfg,res, fsm)
     fsm.set_state(game_state)
     fsm.run()
+    res.save_highscores()
