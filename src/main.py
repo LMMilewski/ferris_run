@@ -194,7 +194,7 @@ class Ferris:
         return self.sprite[self.direction].aabb(self.position)
 
     def reset(self):
-        self.position = (300,300)
+        self.position = (300,250)
         self.direction = DIR_LEFT
 
     def set_speed_normal(self):
@@ -270,7 +270,7 @@ class Sister:
     def __init__(self, cfg, res, ferris):
         self.cfg = cfg
         self.res = res
-        self.ferris = ferris   
+        self.ferris = ferris
         self.sprite = [ Sprite("sister-left", self.res, 0.1),
                         Sprite("sister-down", self.res, 0.1),
                         Sprite("sister-right", self.res, 0.1),
@@ -359,6 +359,7 @@ class MainMenu(GameState):
         self.cfg = cfg
         self.res = res  
         self.fsm = fsm
+
         self.logo = Sprite("logo", self.res, None, ORIGIN_TOP_LEFT)
         self.sprites = [Sprite("sister-right", res, 0.1), Sprite("director-right", res, 0.1), Sprite("ferris-right", res, 0.1)]
         self.positions = [[0, 90], [30, 90], [100, 90]]
@@ -368,7 +369,8 @@ class MainMenu(GameState):
         self.menuPosition = 0
         self.finished = False
         self.exit = False
-      
+        self.fsm = fsm
+
     def update(self, dt):
         for person in self.sprites:
             person.update(dt)
@@ -376,7 +378,7 @@ class MainMenu(GameState):
             pos[0] += 50 * dt
             if pos[0] > self.cfg.resolution[0]:
                 pos[0] = 0
-      
+
     def display(self, screen):
         screen.fill((239, 239, 239))
         self.logo.display(screen, (0,100))
@@ -384,10 +386,10 @@ class MainMenu(GameState):
             self.sprites[i].display(screen, self.positions[i])
         if self.positions[1][0] > 100 and self.positions[1][0] < 300:
             self.bubble.display(screen, (self.positions[1][0] + 40, 30))
-            
+
         self.startGame[self.menuPosition].display(screen, (300, 300))
         self.highscores[1 - self.menuPosition].display(screen, (300, 350))
-            
+
     def next_state(self):
         if self.exit:
             return GameState.next_state(self)
@@ -395,8 +397,9 @@ class MainMenu(GameState):
             return FerrisRunGame(self.cfg, self.res, self.fsm)    
         else:
             return Highscores(self.cfg, self.res, self.fsm)
-                    
-            
+
+
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
@@ -406,9 +409,11 @@ class MainMenu(GameState):
                 self.menuPosition = (self.menuPosition + 1) % 2
             elif event.key == K_DOWN:
                 self.menuPosition = (self.menuPosition + 1) % 2           
+            elif event.key == K_DOWN:
+                self.menuPosition = (self.menuPosition + 1) % 2
             elif event.key == K_RETURN:
                 self.finished = True
-                
+
     def is_finished(self):
         return self.finished            
 
@@ -420,25 +425,25 @@ class Highscores(GameState):
         self.fsm = fsm
         self.finished = False
         self.logo = Sprite("highscoreslogo", self.res, None, ORIGIN_TOP_LEFT)
-        self.highscores = self.res.get_highscores()            
-        
+        self.highscores = self.res.get_highscores()
+
     def update(self, dt):
         pass
-      
+
     def display(self, screen):
         screen.fill((239, 239, 239))
         self.logo.display(screen, (0,0))
-        
+
         position = 180
         i = 1
         label = self.res.font_render("LESSERCO", 36, "name   scores   deaths", color.by_name["black"])
-        screen.blit(label, (300, 150))    
+        screen.blit(label, (300, 150))
         for entry in self.highscores:
             label = self.res.font_render("LESSERCO", 36, str(i) + "." + entry["name"] + "\t" + str(entry["points"]) + "\t" + str(entry["deaths"]), color.by_name["black"])
             screen.blit(label, (300, position))    
             position += 30
-            i += 1    
-            
+            i += 1
+
     def next_state(self):
         return MainMenu(self.cfg, self.res, self.fsm)    
                     
@@ -457,6 +462,9 @@ class EnterHighscores(Highscores):
         self.entry = entry
                     
             
+        return MainMenu(self.cfg, self.res, self.fsm)
+
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
@@ -470,7 +478,7 @@ class EnterHighscores(Highscores):
                 
                       
     def is_finished(self):
-        return self.finished    
+        return self.finished
 
 class FerrisRunGame(GameState):
     def __init__(self, cfg, res, fsm):
@@ -507,13 +515,15 @@ class FerrisRunGame(GameState):
                               TrafficLight(traffic_light.YELLOW_BEFORE_RED, 160, 440),
                               TrafficLight(traffic_light.YELLOW_BEFORE_RED, 380, 160),
                               TrafficLight(traffic_light.YELLOW_BEFORE_RED, 380, 380)]
-        self.trafficLights[0].setPosition(610, 300)
-        self.trafficLights[1].setPosition(390, 160)
-        self.trafficLights[2].setPosition(220, 300)
-        self.trafficLights[3].setPosition(440, 300)
-        self.trafficLights[4].setPosition(140, 440)
-        self.trafficLights[6].setPosition(360, 160)
-        self.trafficLights[7].setPosition(360, 380)
+        for i in range(8):
+            self.trafficLights[i].setPosition(290,270)
+        # self.trafficLights[0].setPosition(610, 300)
+        # self.trafficLights[1].setPosition(390, 160)
+        # self.trafficLights[2].setPosition(220, 300)
+        # self.trafficLights[3].setPosition(440, 300)
+        # self.trafficLights[4].setPosition(140, 440)
+        # self.trafficLights[6].setPosition(360, 160)
+        # self.trafficLights[7].setPosition(360, 380)
 
         crossings =  [(160, 160, 80, 80), (380, 160, 80, 80), (160, 380, 80, 80), (380, 380, 80, 80)]
 
@@ -561,7 +571,7 @@ class FerrisRunGame(GameState):
         self.possible_bonuses = [
             [ BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich", "Registeres give more points"),
               BonusWithTimer(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed", "Ferris moves much faster"),
-              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee", "Sen enemies to their startpoints"),
+              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee", "Send enemies to their startpoints"),
               BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick", "Instantaneously pick the register"), ],
 
             [ BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights", "Traffic lights go red"),
@@ -581,7 +591,9 @@ class FerrisRunGame(GameState):
         self.ferris.reset()
         self.director = Director(self.cfg, self.res, self.ferris)
         self.sister = Sister(self.cfg, self.res, self.ferris)
-        self.enemies = [self.director, self.sister] + self.cars
+        self.enemies = [self.director] + self.cars
+        if self.level_num >= 2:
+            self.enemies.append(self.sister)
         self.stopped = True
 
     def go_to_next_level(self):
@@ -607,12 +619,17 @@ class FerrisRunGame(GameState):
         self.reset_level()
 
     def update(self, dt):
+        dt *= self.cfg.game_speed_multipliers[self.level_num]
+
         self.dt = dt
 
         if self.bullet_time:
             dt *= self.cfg.bullet_slowdown_factor
 
         if self.stopped:
+            return
+
+        if self.teleporting:
             return
 
         self.background.update(dt)
@@ -632,8 +649,15 @@ class FerrisRunGame(GameState):
             self.ferris.update(dt / self.cfg.bullet_slowdown_factor, self.cars)
         else:
             self.ferris.update(dt, self.cars)
-        self.director.update(dt, self.cars)
-        self.sister.update(dt, self.cars)
+
+        director_dt = dt if self.level_num > 1 else dt * 0.5
+        director_dt = dt if self.level_num < 6 else dt * 1.2
+        self.director.update(director_dt, self.cars)
+
+        if self.level_num >= 2:
+            sister_dt = dt if self.level_num >= 3 else dt * 0.5
+            sister_dt = dt if self.level_num <  7 else dt * 1.2
+            self.sister.update(sister_dt, self.cars)
         self.register.update(dt)
         for bonus in self.bonuses:
             if self.bullet_time:
@@ -820,7 +844,8 @@ class FerrisRunGame(GameState):
         self.register.display(screen)
         self.ferris.display(screen)
         self.director.display(screen)
-        self.sister.display(screen)
+        if self.level_num >= 2:
+            self.sister.display(screen)
 
         board_size = self.cfg.board_size[0]
         self.hud.display(screen, (board_size,0))
