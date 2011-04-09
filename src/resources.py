@@ -19,6 +19,7 @@ class Resources:
         self.music     = {}
         self.font      = {}
         self.animation = {}
+        self.highscores = []
 
     def load_all(self):
         if self.cfg.sound:
@@ -27,6 +28,7 @@ class Resources:
             self.load_music_files()
         self.load_animation_files()
         self.load_font_files()
+        self.__load_highscores()
         return self
 
     ## define resources you want to use
@@ -52,6 +54,13 @@ class Resources:
         # add filename without extension here (i.e. 'bg' will
         # load 'bg.png' file)
         files = ["background",
+                 "logo",
+                 "highscoreslogo",
+                 "SpeechBubble",
+                 "startgame0",
+                 "startgame1",
+                 "highscores0",
+                 "highscores1",
                  "hud",
                  "ferris-left",
                  "ferris-right",
@@ -234,3 +243,27 @@ class Resources:
 
     def __flip_image(self):
         return lambda image: pygame.transform.flip(image, True, False)
+    
+    def __load_highscores(self):
+        f = open(self.cfg.highscores_path, 'r')     
+        content = f.read()     
+        entries = content.split(self.cfg.highscore_entry_delimiter)
+        for entry in entries:
+            e = entry.split(self.cfg.highscore_delimiter)
+            self.highscores.append({"name":e[0], "points":e[1], "deaths":e[2]})
+            
+                
+    def __save_highscores(self):
+        f = open(self.cfg.highscores_path, 'w')  
+        for i in range(0, min(self.cfg.highscore_entries, len(self.highscores))):
+            f.write(self.highscores[i]["name"])
+            f.write(self.cfg.highscore_delimiter)
+            f.write(self.highscores[i]["points"])
+            f.write(self.cfg.highscore_delimiter)
+            f.write(self.highscores[i]["deaths"])
+            f.write(self.cfg.highscore_entry_delimiter)
+            
+    def get_highscores(self):
+        return self.highscores
+        
+        
