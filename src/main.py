@@ -74,10 +74,13 @@ def get_next_position(cfg, position, direction, dt, speed):
 
 
 class BonusWithTimer:
-    def __init__(self, cfg, res, command, undo_command, name):
+    def __init__(self, cfg, res, command, undo_command, name, passive = False):
+        """ if the bonus is passive (passive = True) then the bonus is never deactivated
+        """
         self.cfg = cfg
         self.res = res
         self.command = command
+        self.passive = passive
         self.undo_command = undo_command
         self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
         self.sprite_dark = Sprite(name + "-mini-dark", self.res, None, ORIGIN_TOP_LEFT)
@@ -85,9 +88,13 @@ class BonusWithTimer:
         self.type = "timer"
 
     def activate(self):
-        self.command()
+        if not self.active:
+            self.active = True
+            self.command()
 
     def deactivate(self):
+        if self.passive:
+            return
         self.finished = True
         self.active = False
         self.undo_command()
@@ -96,15 +103,21 @@ class BonusWithTimer:
             self.reset()
 
     def update(self, dt):
+        if self.passive:
+            return
         if self.active:
             self.time_left -= dt
             if self.time_left <= 0:
                 self.deactivate()
 
     def reset(self):
+        self.finished = False
+        if self.passive:
+            self.active = True
+            self.time_left = "passive"
+            return
         self.active = False
         self.time_left = self.cfg.bonus_duration
-        self.finished = False
 
 class BonusWithCounter:
     def __init__(self, cfg, res, command, name):
@@ -349,6 +362,7 @@ class FerrisRunGame(GameState):
         self.bonuses = []
         self.blood_sprite = Sprite("blood", self.res)
         self.blood_positions = []
+        self.remote_gather = False
 
         self.stopped = True # the game is not playing right now (characters don't move etc)
 
@@ -414,7 +428,8 @@ class FerrisRunGame(GameState):
               BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
               BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"),
               BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"), ],
-            [ BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"), ]
+            [ BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"),
+              BonusWithTimer(self.cfg, self.res, self.remote_gather_on, self.remote_gather_off, "bonus-remote-gather", True), ]
             ]
 
     def set_level(self, level_num):
@@ -546,6 +561,12 @@ class FerrisRunGame(GameState):
         self.currentOffset = 1
         for lane in self.lanes:
             lane.reset()
+
+    def remote_gather_on(self):
+        self.remote_gather = True
+
+    def remote_gather_off(self):
+        pass
 
     def pick_register(self):
         self.res.sounds_play("collect")

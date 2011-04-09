@@ -69,6 +69,8 @@ class Resources:
                  "bonus-lights-mini-dark",
                  "bonus-pick-mini",
                  "bonus-pick-mini-dark",
+                 "bonus-remote-gather-mini",
+                 "bonus-remote-gather-mini-dark",
                  "redcar-right",
                  "whitecar-right",
                  "yellowcar-right",
