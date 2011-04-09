@@ -37,7 +37,7 @@ def direction_to_vector(direction):
     if direction == DIR_STOP:
         return (0,0)
 
-def direction_to_target(position, target):
+def target_to_directions(position, target):
     """
     assuming you can go in X or Y direction, try to shorten larger of
     distances: distances in x, distances in y
@@ -47,10 +47,13 @@ def direction_to_target(position, target):
     else:
         target_dx = target[0] - position[0]
         target_dy = target[1] - position[1]
+        horizontal_direction = DIR_LEFT if target_dx < 0 else DIR_RIGHT
+        vertical_direction = DIR_UP if target_dy < 0 else DIR_DOWN
         if abs(target_dx) > abs(target_dy):
-            return DIR_LEFT if target_dx < 0 else DIR_RIGHT
+            return [horizontal_direction, vertical_direction, (horizontal_direction + 4) % 2, (vertical_direction + 4) % 2]
         else:
-            return DIR_UP if target_dy < 0 else DIR_DOWN
+            return [vertical_direction, horizontal_direction, (vertical_direction + 4) % 2, (horizontal_direction + 4) % 2]
+
 
 def get_next_position(cfg, position, direction, dt, speed):
     dx, dy = direction_to_vector(direction)
@@ -71,20 +74,31 @@ def get_next_position(cfg, position, direction, dt, speed):
 
 
 class BonusWithTimer:
-    def __init__(self, cfg, res, command, undo_command, name):
+    def __init__(self, cfg, res, command, undo_command, name, passive = False):
+        """ if the bonus is passive (passive = True) then the bonus is never deactivated
+        """
         self.cfg = cfg
         self.res = res
         self.command = command
+        self.passive = passive
         self.undo_command = undo_command
         self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
         self.sprite_dark = Sprite(name + "-mini-dark", self.res, None, ORIGIN_TOP_LEFT)
         self.reset()
         self.type = "timer"
 
+    def on_add(self):
+        if self.passive:
+            self.activate()
+
     def activate(self):
-        self.command()
+        if not self.active:
+            self.active = True
+            self.command()
 
     def deactivate(self):
+        if self.passive:
+            return
         self.finished = True
         self.active = False
         self.undo_command()
@@ -93,15 +107,20 @@ class BonusWithTimer:
             self.reset()
 
     def update(self, dt):
+        if self.passive:
+            return
         if self.active:
             self.time_left -= dt
             if self.time_left <= 0:
                 self.deactivate()
 
     def reset(self):
-        self.active = False
-        self.time_left = self.cfg.bonus_duration
         self.finished = False
+        self.active = False
+        if self.passive:
+            self.time_left = "passive"
+            return
+        self.time_left = self.cfg.bonus_duration
 
 class BonusWithCounter:
     def __init__(self, cfg, res, command, name):
@@ -113,6 +132,9 @@ class BonusWithCounter:
         self.reset()
         self.active = False
         self.type = "counter"
+
+    def on_add(self):
+        pass
 
     def activate(self):
         if self.count_left > 0:
@@ -144,18 +166,22 @@ class Ferris:
                         Sprite("ferris-up", self.res, 0.1) ]
         self.speed = self.cfg.ferris_speed
         self.reset()
+        self.seen_by_cop = False
 
     def update(self, dt, cars):
         self.sprite[self.direction].update(dt)
         lastX = self.position[0]
         lastY = self.position[1]
-        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+        speed = self.speed
+        if self.seen_by_cop:
+            speed *= self.cfg.cop_slowdown_multiplier
+        self.position = get_next_position(self.cfg, self.position, self.direction, dt, speed)
         for car in cars:
             if aabb_collision(self.aabb(), car.aabb()):
-                self.position = (lastX, lastY)        
+                self.position = (lastX, lastY)
                 if car.isInFront(self):
-                    self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)     
-                return;       
+                    self.position = get_next_position(self.cfg, self.position, self.direction, dt, speed)
+                return;
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
@@ -172,16 +198,13 @@ class Ferris:
 
     def set_speed_fast(self):
         self.speed = self.cfg.ferris_speed_fast
-        
+
     def getPosition(self):
         return self.sprite[self.direction].getPosition(self.position)
 
     def getSize(self):
-        return self.sprite[self.direction].getSize()         
-    
-    def set_speed_cop_watch(self):
-        self.speed = self.cfg.ferris_speed_cop
-    
+        return self.sprite[self.direction].getSize()
+
     def get_position(self):
         return self.position;
 
@@ -204,22 +227,28 @@ class Director:
 
     def update(self, dt, objects):
         self.sprite[self.direction].update(dt)
-        
+
         lastX = self.position[0]
         lastY = self.position[1]
-        
+
         self.target = self.ferris.position
         if self.flee:
             self.target = (500, 500)
         else:
             self.target = self.ferris.position
-        self.direction = direction_to_target(self.position, self.target)
-        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
-        
-        for object in objects:
-            if aabb_collision(self.aabb(), object.aabb()):
-                self.position = (lastX, lastY)                
-                return;        
+
+        for direction in target_to_directions(self.position, self.target):
+            valid = True
+            prev_position = self.position
+            self.position = get_next_position(self.cfg, self.position, direction, dt, self.speed)
+            for object in objects:
+                if aabb_collision(self.aabb(), object.aabb()):
+                    valid = False
+                    self.position = prev_position
+                    break;
+            if valid:
+                self.direction = direction
+                break
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
@@ -231,18 +260,18 @@ class Director:
         return self.sprite[self.direction].getPosition(self.position)
 
     def getSize(self):
-        return self.sprite[self.direction].getSize()     
+        return self.sprite[self.direction].getSize()
 
 class Sister:
     def __init__(self, cfg, res, ferris):
         self.cfg = cfg
         self.res = res
-        self.ferris = ferris
-        
+        self.ferris = ferris   
         self.sprite = [ Sprite("sister-left", self.res, 0.1),
                         Sprite("sister-down", self.res, 0.1),
                         Sprite("sister-right", self.res, 0.1),
                         Sprite("sister-up", self.res, 0.1) ]
+
         self.direction = DIR_LEFT
         self.speed = self.cfg.sister_speed
         self.position = (100,100)
@@ -261,18 +290,20 @@ class Sister:
                 ferris_dir = direction_to_vector(self.ferris.direction)
                 self.target = self.ferris.position[0] + ferris_dir[0] * 80, self.ferris.position[1] + ferris_dir[1] * 80
 
-        lastX = self.position[0]
-        lastY = self.position[1]
-
-        new_direction = direction_to_target(self.position, self.target)
-        if new_direction != (self.direction + 2) % 4: # can't reverse direction
-            self.direction = new_direction
-        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
-        
-        for object in objects:
-            if aabb_collision(self.aabb(), object.aabb()):
-                self.position = (lastX, lastY)
-                return        
+        for direction in target_to_directions(self.position, self.target):
+            if direction == (self.direction + 2) % 4: # can't reverse direction
+                continue
+            valid = True
+            prev_position = self.position
+            self.position = get_next_position(self.cfg, self.position, direction, dt, self.speed)
+            for object in objects:
+                if aabb_collision(self.aabb(), object.aabb()):
+                    valid = False
+                    self.position = prev_position
+                    break;
+            if valid:
+                self.direction = direction
+                break
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
@@ -284,28 +315,31 @@ class Sister:
         return self.sprite[self.direction].getPosition(self.position)
 
     def getSize(self):
-        return self.sprite[self.direction].getSize() 
+        return self.sprite[self.direction].getSize()
 
 class Register:
-    def __init__(self, cfg, res):
+    def __init__(self, cfg, res, initial_position = None):
         self.cfg = cfg
         self.res = res
         self.sprite = Sprite("register", self.res, 0.1)
 
-        while True:
-            position = random.integer(20,580), random.integer(20,580)
-            if position[0] < 20 or position[1] < 20:
-                continue
-            if 160 <= position[0] and position[0] <= 220:
-                continue
-            if 380 <= position[0] and position[0] <= 440:
-                continue
-            if 160 <= position[1] and position[1] <= 220:
-                continue
-            if 380 <= position[1] and position[1] <= 440:
-                continue
-            self.position = position
-            break
+        if initial_position != None:
+            self.position = initial_position
+        else:
+            while True:
+                position = random.randint(20,580), random.randint(20,580)
+                if position[0] < 20 or position[1] < 20:
+                    continue
+                if 160 <= position[0] and position[0] <= 220:
+                    continue
+                if 380 <= position[0] and position[0] <= 440:
+                    continue
+                if 160 <= position[1] and position[1] <= 220:
+                    continue
+                if 380 <= position[1] and position[1] <= 440:
+                    continue
+                self.position = position
+                break
 
     def update(self, dt):
         self.sprite.update(dt)
@@ -324,11 +358,9 @@ class FerrisRunGame(GameState):
         self.cfg = cfg
         self.res = res
 
-        random.init()
-
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
-        self.register = Register(cfg, res)
+        self.register = Register(cfg, res, (350, 350))
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
@@ -336,6 +368,9 @@ class FerrisRunGame(GameState):
         self.points = 0
         self.deaths = 0
         self.bonuses = []
+        self.blood_sprite = Sprite("blood", self.res)
+        self.blood_positions = []
+        self.remote_gather = False
 
         self.stopped = True # the game is not playing right now (characters don't move etc)
 
@@ -401,7 +436,8 @@ class FerrisRunGame(GameState):
               BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
               BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"),
               BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"), ],
-            [ BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"), ]
+            [ BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"),
+              BonusWithTimer(self.cfg, self.res, self.remote_gather_on, self.remote_gather_off, "bonus-remote-gather", True), ]
             ]
 
     def set_level(self, level_num):
@@ -419,14 +455,16 @@ class FerrisRunGame(GameState):
         self.stopped = True
 
     def go_to_next_level(self):
+        self.blood_positions = []
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
             bonus.reset()
-            
+
     def die(self):
+        self.blood_positions.append(self.ferris.position)
         self.res.sounds_play("die")
         self.deaths += 1
-        self.reset_level()       
+        self.reset_level()
 
     def update(self, dt):
         self.dt = dt
@@ -439,17 +477,13 @@ class FerrisRunGame(GameState):
 
         self.background.update(dt)
 
-        for car in self.cars:   
+        for car in self.cars:
             car.update(dt, self.cars, [self.director, self.sister])
 
         no_of_cops_seeing_ferris = 0;
         for cop in self.cops:
             no_of_cops_seeing_ferris += cop.update(dt, self.ferris.get_position());
-
-        if no_of_cops_seeing_ferris > 0:
-            self.ferris.set_speed_cop_watch();
-        else:
-            self.ferris.set_speed_normal();
+        self.ferris.seen_by_cop = no_of_cops_seeing_ferris > 0
 
         self.hud.update(dt)
 
@@ -466,19 +500,19 @@ class FerrisRunGame(GameState):
                 bonus.update(dt / self.cfg.bullet_slowdown_factor)
             else:
                 bonus.update(dt)
-                
 
-        # check collision with register        
-        if aabb_collision(self.ferris.aabb(), self.register.aabb()):        
-           self.res.sounds_play("collect")       
+
+        # check collision with register
+        if self.collision_with_register():
+           self.res.sounds_play("collect")
            self.register = Register(self.cfg, self.res)
-       
+
            self.points += 100 * (self.cfg.rich_mode_multiplier if self.rich_mode else 1)
-        
-           self.registers_left -= 1        
-           if self.registers_left <= 0:       
-               self.go_to_next_level()     
-               return                
+
+           self.registers_left -= 1
+           if self.registers_left <= 0:
+               self.go_to_next_level()
+               return
 
         # check collision with enemies
         if not self.cfg.godmode:
@@ -499,6 +533,12 @@ class FerrisRunGame(GameState):
                 lane.changeState()
 
         self.allsprites.update()
+
+    def collision_with_register(self):
+        if self.remote_gather:
+            return distance(self.ferris.position, self.register.position) < self.cfg.remote_gather_radius
+        else:
+            return aabb_collision(self.ferris.aabb(), self.register.aabb())
 
     def bullet_time_on(self):
         self.bullet_time = True
@@ -531,6 +571,12 @@ class FerrisRunGame(GameState):
         self.currentOffset = 1
         for lane in self.lanes:
             lane.reset()
+
+    def remote_gather_on(self):
+        self.remote_gather = True
+
+    def remote_gather_off(self): # this is passive, always active
+        pass
 
     def pick_register(self):
         self.res.sounds_play("collect")
@@ -588,8 +634,12 @@ class FerrisRunGame(GameState):
             if self.cfg.cheat_mode:
                 if event.key == K_7:
                     self.bonuses = self.possible_bonuses[0]
+                    for bonus in self.bonuses:
+                        bonus.on_add()
                 if event.key == K_8:
                     self.bonuses = self.possible_bonuses[1]
+                    for bonus in self.bonuses:
+                        bonus.on_add()
                 if event.key == K_9:
                     self.go_to_next_level()
                 if event.key == K_0:
@@ -597,6 +647,9 @@ class FerrisRunGame(GameState):
 
     def display(self, screen):
         self.background.display(screen, (0,0))
+
+        for blood_position in self.blood_positions:
+            self.blood_sprite.display(screen, blood_position)
 
         for car in self.cars:
             car.display(screen)

@@ -79,10 +79,15 @@ class Resources:
                  "bonus-lights-mini-dark",
                  "bonus-pick-mini",
                  "bonus-pick-mini-dark",
+                 "bonus-remote-gather-mini",
+                 "bonus-remote-gather-mini-dark",
+                 "bonus-teleport-mini",
+                 "bonus-teleport-mini-dark",
                  "redcar-right",
                  "bluecar-right",
                  "yellowcar-right",
-                 "answer"]
+                 "answer",
+                 "blood"]
         for file in files:
             self.load_animation_file(file)
 

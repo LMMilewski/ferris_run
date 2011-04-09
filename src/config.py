@@ -37,14 +37,15 @@ class Config:
         ### game specyfic options
         self.ferris_speed = 100
         self.ferris_speed_fast = 200
-        self.ferris_speed_cop = 50;
+        self.cop_slowdown_multiplier = 0.5
         self.director_speed = 60
         self.sister_speed = 70
         self.car_speed = 120
         self.board_size = 600,600
         self.registers_per_level = 9
         self.bonus_duration = 10
-        self.bonus_count = 3
+        self.bonus_count = 2
+        self.remote_gather_radius = 100
         self.bullet_slowdown_factor = 0.5
         self.rich_mode_multiplier = 2
         self.cheat_mode = '--cheatmode' in sys.argv
