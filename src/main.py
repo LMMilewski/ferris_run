@@ -160,10 +160,10 @@ class Ferris:
         self.cfg = cfg
         self.res = res
 
-        self.sprite = [ Sprite("ferris-left", self.res, 0.5),
-                        Sprite("ferris-down", self.res, 0.5),
-                        Sprite("ferris-right", self.res, 0.5),
-                        Sprite("ferris-up", self.res, 0.5) ]
+        self.sprite = [ Sprite("ferris-left", self.res, 0.1),
+                        Sprite("ferris-down", self.res, 0.1),
+                        Sprite("ferris-right", self.res, 0.1),
+                        Sprite("ferris-up", self.res, 0.1) ]
         self.speed = self.cfg.ferris_speed
         self.reset()
         self.seen_by_cop = False
@@ -215,10 +215,10 @@ class Director:
         self.res = res
         self.ferris = ferris
 
-        self.sprite = [ Sprite("director-left", self.res, 0.25),
-                        Sprite("director-down", self.res, 0.25),
-                        Sprite("director-right", self.res, 0.25),
-                        Sprite("director-up", self.res, 0.25) ]
+        self.sprite = [ Sprite("director-left", self.res, 0.1),
+                        Sprite("director-down", self.res, 0.1),
+                        Sprite("director-right", self.res, 0.1),
+                        Sprite("director-up", self.res, 0.1) ]
         self.direction = DIR_LEFT
         self.speed = self.cfg.director_speed
         self.position = (500,500)
@@ -266,12 +266,12 @@ class Sister:
     def __init__(self, cfg, res, ferris):
         self.cfg = cfg
         self.res = res
-        self.ferris = ferris
+        self.ferris = ferris   
+        self.sprite = [ Sprite("sister-left", self.res, 0.1),
+                        Sprite("sister-down", self.res, 0.1),
+                        Sprite("sister-right", self.res, 0.1),
+                        Sprite("sister-up", self.res, 0.1) ]
 
-        self.sprite = [ Sprite("sister-left", self.res, 0.25),
-                        Sprite("sister-down", self.res, 0.25),
-                        Sprite("sister-right", self.res, 0.25),
-                        Sprite("sister-up", self.res, 0.25) ]
         self.direction = DIR_LEFT
         self.speed = self.cfg.sister_speed
         self.position = (100,100)
@@ -321,7 +321,7 @@ class Register:
     def __init__(self, cfg, res, initial_position = None):
         self.cfg = cfg
         self.res = res
-        self.sprite = Sprite("register", self.res, 0.25)
+        self.sprite = Sprite("register", self.res, 0.1)
 
         if initial_position != None:
             self.position = initial_position

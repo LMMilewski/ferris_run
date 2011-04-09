@@ -48,13 +48,23 @@ class Resources:
             self.load_music_file(file)
 
     def load_animation_files(self):
+        # car sprites from http://gmc.yoyogames.com/index.php?showtopic=454600
         # add filename without extension here (i.e. 'bg' will
         # load 'bg.png' file)
         files = ["background",
                  "hud",
                  "ferris-left",
+                 "ferris-right",
+                 "ferris-up",
+                 "ferris-down",
                  "director-left",
+                 "director-right",
+                 "director-up",
+                 "director-down",
                  "sister-left",
+                 "sister-right",
+                 "sister-up",
+                 "sister-down",                 
                  "register",
                  "car-left-white",
                  "bonus-speed-mini",
@@ -74,7 +84,7 @@ class Resources:
                  "bonus-teleport-mini",
                  "bonus-teleport-mini-dark",
                  "redcar-right",
-                 "whitecar-right",
+                 "bluecar-right",
                  "yellowcar-right",
                  "answer",
                  "blood"]
@@ -86,17 +96,8 @@ class Resources:
         # i.e.
         # self.__map_animation_frames("orig_anim", "dest_anim",  self.__rotate_image(90))
         # will rotate it 90 degrees counter-clockwise
-        self.__map_animation_frames("ferris-left", "ferris-down",  self.__rotate_image(90))
-        self.__map_animation_frames("ferris-left", "ferris-right", self.__rotate_image(180))
-        self.__map_animation_frames("ferris-left", "ferris-up",    self.__rotate_image(270))
 
-        self.__map_animation_frames("director-left", "director-down",  self.__rotate_image(90))
-        self.__map_animation_frames("director-left", "director-right", self.__rotate_image(180))
-        self.__map_animation_frames("director-left", "director-up",    self.__rotate_image(270))
 
-        self.__map_animation_frames("sister-left", "sister-down",  self.__rotate_image(90))
-        self.__map_animation_frames("sister-left", "sister-right", self.__rotate_image(180))
-        self.__map_animation_frames("sister-left", "sister-up",    self.__rotate_image(270))
 
         self.__map_animation_frames("car-left-white", "car-down-white",  self.__rotate_image(90))
         self.__map_animation_frames("car-left-white", "car-right-white", self.__rotate_image(180))
@@ -121,9 +122,9 @@ class Resources:
         self.__map_animation_frames("redcar-right", "redcar-left", self.__rotate_image(180))
         self.__map_animation_frames("redcar-right", "redcar-down",    self.__rotate_image(270))        
         
-        self.__map_animation_frames("whitecar-right", "whitecar-up",  self.__rotate_image(90))
-        self.__map_animation_frames("whitecar-right", "whitecar-left", self.__rotate_image(180))
-        self.__map_animation_frames("whitecar-right", "whitecar-down",    self.__rotate_image(270))   
+        self.__map_animation_frames("bluecar-right", "bluecar-up",  self.__rotate_image(90))
+        self.__map_animation_frames("bluecar-right", "bluecar-left", self.__rotate_image(180))
+        self.__map_animation_frames("bluecar-right", "bluecar-down",    self.__rotate_image(270))   
         
         self.__map_animation_frames("yellowcar-right", "yellowcar-up",  self.__rotate_image(90))
         self.__map_animation_frames("yellowcar-right", "yellowcar-left", self.__rotate_image(180))
