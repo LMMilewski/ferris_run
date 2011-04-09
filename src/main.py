@@ -318,25 +318,28 @@ class Sister:
         return self.sprite[self.direction].getSize()
 
 class Register:
-    def __init__(self, cfg, res):
+    def __init__(self, cfg, res, initial_position = None):
         self.cfg = cfg
         self.res = res
         self.sprite = Sprite("register", self.res, 0.25)
 
-        while True:
-            position = random.randint(20,580), random.randint(20,580)
-            if position[0] < 20 or position[1] < 20:
-                continue
-            if 160 <= position[0] and position[0] <= 220:
-                continue
-            if 380 <= position[0] and position[0] <= 440:
-                continue
-            if 160 <= position[1] and position[1] <= 220:
-                continue
-            if 380 <= position[1] and position[1] <= 440:
-                continue
-            self.position = position
-            break
+        if initial_position != None:
+            self.position = initial_position
+        else:
+            while True:
+                position = random.randint(20,580), random.randint(20,580)
+                if position[0] < 20 or position[1] < 20:
+                    continue
+                if 160 <= position[0] and position[0] <= 220:
+                    continue
+                if 380 <= position[0] and position[0] <= 440:
+                    continue
+                if 160 <= position[1] and position[1] <= 220:
+                    continue
+                if 380 <= position[1] and position[1] <= 440:
+                    continue
+                self.position = position
+                break
 
     def update(self, dt):
         self.sprite.update(dt)
@@ -357,7 +360,7 @@ class FerrisRunGame(GameState):
 
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
-        self.register = Register(cfg, res)
+        self.register = Register(cfg, res, (350, 350))
 
         self.background = Sprite("background", self.res, None, ORIGIN_TOP_LEFT)
         self.hud = Sprite("hud", self.res, None, ORIGIN_TOP_LEFT)
