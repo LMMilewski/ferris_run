@@ -19,6 +19,7 @@ class Config:
         self.resolution = 800,600 # in this resolution the game is blited onto Surface
         self.screen_resolution = 800,600 # just before swap buffers the screen is scaled to this resolution
         self.fullscreen = "--fullscreen" in sys.argv
+        self.fullscreen = True
         self.fps_limit = 60
         self.app_name = "Ferris Run"
 
