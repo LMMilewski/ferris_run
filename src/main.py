@@ -557,7 +557,9 @@ class FerrisRunGame(GameState):
         self.ferris.reset()
         self.director = Director(self.cfg, self.res, self.ferris)
         self.sister = Sister(self.cfg, self.res, self.ferris)
-        self.enemies = [self.director, self.sister] + self.cars
+        self.enemies = [self.director] + self.cars
+        if self.level_num >= 2:
+            self.enemies.append(self.sister)
         self.stopped = True
 
     def go_to_next_level(self):
@@ -609,7 +611,8 @@ class FerrisRunGame(GameState):
         else:
             self.ferris.update(dt, self.cars)
         self.director.update(dt if self.level_num > 1 else dt * 0.5, self.cars)
-        self.sister.update(dt, self.cars)
+        if self.level_num >= 2:
+            self.sister.update(dt if self.level_num >= 3 else dt * 0.5, self.cars)
         self.register.update(dt)
         for bonus in self.bonuses:
             if self.bullet_time:
@@ -796,7 +799,8 @@ class FerrisRunGame(GameState):
         self.register.display(screen)
         self.ferris.display(screen)
         self.director.display(screen)
-        self.sister.display(screen)
+        if self.level_num >= 2:
+            self.sister.display(screen)
 
         board_size = self.cfg.board_size[0]
         self.hud.display(screen, (board_size,0))
