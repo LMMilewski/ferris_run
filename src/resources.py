@@ -7,7 +7,6 @@ To add new resources to your game put definitions in load_* methods
 import os
 import pygame
 from pygame.locals import *
-
 import color
 
 class Resources:
@@ -252,20 +251,34 @@ class Resources:
         entries = content.split(self.cfg.highscore_entry_delimiter)
         for entry in entries:
             e = entry.split(self.cfg.highscore_delimiter)
-            self.highscores.append({"name":e[0], "points":e[1], "deaths":e[2]})
+            self.highscores.append({"name":e[0], "points":int(e[1]), "deaths":int(e[2])})
+        self.__sort_highscores()
             
                 
-    def __save_highscores(self):
+    def save_highscores(self):
         f = open(self.cfg.highscores_path, 'w')  
         for i in range(0, min(self.cfg.highscore_entries, len(self.highscores))):
             f.write(self.highscores[i]["name"])
             f.write(self.cfg.highscore_delimiter)
-            f.write(self.highscores[i]["points"])
+            f.write(str(self.highscores[i]["points"]))
             f.write(self.cfg.highscore_delimiter)
-            f.write(self.highscores[i]["deaths"])
-            f.write(self.cfg.highscore_entry_delimiter)
+            f.write(str(self.highscores[i]["deaths"]))
+            if i + 1 < min(self.cfg.highscore_entries, len(self.highscores)):
+                f.write(self.cfg.highscore_entry_delimiter)
             
     def get_highscores(self):
         return self.highscores
+    
+    def add_highscore(self, points, deaths):
+        entry = {"name":"", "points":points, "deaths":deaths}
+        self.highscores.append(entry)
+        self.__sort_highscores()   
+        pos = self.highscores.index(entry)  
+        if pos < self.cfg.highscore_entries:            
+            return self.highscores[pos]
+        else:
+            return None        
         
-        
+    def __sort_highscores(self):
+        self.highscores.sort(cmp=None, key=lambda entry: entry['deaths'], reverse=False) 
+        self.highscores.sort(cmp=None, key=lambda entry: entry['points'], reverse=False)        
