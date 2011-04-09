@@ -374,6 +374,9 @@ class FerrisRunGame(GameState):
 
         self.answer = Sprite("answer", self.res)
 
+        self.teleport_sprite = Sprite("teleport_area", self.res, None, ORIGIN_TOP_LEFT)
+        self.teleporting = False
+
         self.trafficLights = [TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 160, 160),
                               TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 380, 160),
                               TrafficLight(traffic_light.YELLOW_BEFORE_GREEN, 220, 380),
@@ -432,10 +435,12 @@ class FerrisRunGame(GameState):
             [ BonusWithTimer(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
               BonusWithTimer(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow"),
               BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
-              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"),
-              BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"), ],
-            [ BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"),
-              BonusWithTimer(self.cfg, self.res, self.remote_gather_on, self.remote_gather_off, "bonus-remote-gather", True), ]
+              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"), ],
+            [ BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"),
+              BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"),
+              BonusWithTimer(self.cfg, self.res, self.remote_gather_on, self.remote_gather_off, "bonus-remote-gather", True),
+              BonusWithCounter(self.cfg, self.res, self.teleport, "bonus-teleport")
+              ]
             ]
 
     def set_level(self, level_num):
@@ -576,6 +581,9 @@ class FerrisRunGame(GameState):
     def remote_gather_off(self): # this is passive, always active
         pass
 
+    def teleport(self):
+        self.teleporting = True
+
     def pick_register(self):
         self.res.sounds_play("collect")
         self.register = Register(self.cfg, self.res)
@@ -585,6 +593,23 @@ class FerrisRunGame(GameState):
             self.go_to_next_level()
 
     def process_event(self, event):
+        if event.type == MOUSEBUTTONDOWN:
+            if self.teleporting and not self.stopped:
+                if event.pos[0] < 0 or event.pos[0] > 600:
+                    return
+                if event.pos[1] < 0 or event.pos[1] > 600:
+                    return
+                if 160 <= event.pos[0] and event.pos[0] <= 220:
+                    return
+                if 380 <= event.pos[0] and event.pos[0] <= 440:
+                    return
+                if 160 <= event.pos[1] and event.pos[1] <= 220:
+                    return
+                if 380 <= event.pos[1] and event.pos[1] <= 440:
+                    return
+                self.ferris.position = event.pos
+                self.teleporting = False
+
         if event.type == KEYDOWN:
             self.last_keys.append(event.key)
             self.last_keys = self.last_keys[-100:]
@@ -707,6 +732,12 @@ class FerrisRunGame(GameState):
             collect_text = self.res.font_render("LESSERCO", 36, "Collect dictionaries (stars)", color.by_name["red"])
             screen.blit(collect_text, (110,450))
 
+        if self.teleporting and not self.stopped:
+            pygame.mouse.set_visible(True)
+            self.teleport_sprite.display(screen, (0,0))
+        else:
+            pygame.mouse.set_visible(not self.cfg.fullscreen)
+
         if self.cfg.answer:
             self.answer.display(screen, (350,350))
 
@@ -734,5 +765,4 @@ def main():
     res = Resources(cfg).load_all()
     fsm.set_state(FerrisRunGame(cfg,res))
     pygame.display.set_caption(cfg.app_name)
-    pygame.mouse.set_visible(not cfg.fullscreen)
     fsm.run()
