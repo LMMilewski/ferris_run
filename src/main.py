@@ -351,8 +351,6 @@ class Register:
         return self.sprite.aabb(self.position)
 
 
-
-
 class FerrisRunGame(GameState):
     def __init__(self, cfg, res):
         self.cfg = cfg
