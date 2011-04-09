@@ -603,21 +603,21 @@ class FerrisRunGame(GameState):
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
             bonus.reset()
-
+         
         if self.level_num == 5:
-            cop = Cop(260, 170, 390, 170)
+            cop = Cop(240, 145, 360, 145)
             self.cops.append(cop)
             self.cop_sprites.add(cop.GetSprite())
         if self.level_num == 6:
-            cop = Cop(270, 480, 390, 480)
+            cop = Cop(240, 450, 360, 450)
             self.cops.append(cop)
             self.cop_sprites.add(cop.GetSprite())
         if self.level_num == 7:
-            cop = Cop(490, 265, 490, 385)
+            cop = Cop(450, 245, 450, 365)
             self.cops.append(cop)
             self.cop_sprites.add(cop.GetSprite())
         if self.level_num == 8:
-            cop = Cop(170, 275, 170, 375)
+            cop = Cop(150, 245, 150, 365)
             self.cops.append(cop)
             self.cop_sprites.add(cop.GetSprite())
 
@@ -848,7 +848,7 @@ class FerrisRunGame(GameState):
 
     def display(self, screen):
         self.background.display(screen, (0,0))
-
+        self.allsprites.draw(screen)
         for blood_position in self.blood_positions:
             self.blood_sprite.display(screen, blood_position)
 
@@ -894,7 +894,7 @@ class FerrisRunGame(GameState):
         self.cop_sprites.update();
         self.cop_sprites.draw(screen);
 
-        self.allsprites.draw(screen)
+        
         # pause menu
         if self.stopped:
             dark = pygame.Surface(self.cfg.screen_resolution).convert_alpha()

@@ -3,28 +3,30 @@ import math
 
 class CopSprite(pygame.sprite.Sprite):
     def __init__(self, x, y, alpha):
-        self.r = 25;
+        self.r = 100;
         if (alpha > 180):
             self.alpha = -alpha + 180;
         else:
             self.alpha = alpha;
         pygame.sprite.Sprite.__init__(self);
-        self.x = x;
-        self.y = y;
-        scale = 0.1;
-        image_width = 978;
-        image_height = 1194;
+        self.x = x - self.r / 2;
+        self.y = y - self.r / 2;
+        scale = 1;
+        image_width = 100;
+        image_height = 100;
         self.frame_counter = 0;
         self.image_original =[pygame.transform.scale(pygame.image.load("gfx/cop0.png"), (int(image_width * scale), int(image_height* scale)))];
 
     def update(self):
         self.frame_counter +=1;
-        self.image = pygame.transform.rotate(self.image_original[(self.frame_counter / 100) % len(self.image_original)], self.alpha);
-        self.rect = self.image.get_rect(center=(self.x, self.y));
+        self.image = self.image_original[(self.frame_counter / 100) % len(self.image_original)]
+        self.rect = self.image.get_rect();
+        self.rect[0] = self.x
+        self.rect[1] = self.y
 
     def SetPosition(self, x, y, alpha):
-        self.x = x - self.r;
-        self.y = y - self.r;
+        self.x = x - self.r / 2;
+        self.y = y - self.r / 2;
         self.alpha = -alpha;
 
 class Cop():
@@ -43,6 +45,7 @@ class Cop():
         self.destination_angle = math.degrees(math.acos(self.direction[0]));
         self.ray_length = 60;
         self.ray_angle = 180;
+        self.fake_angle = 0
 
         if (math.copysign(1, self.direction[1]) != math.copysign(1, math.sin(self.destination_angle))):
             self.destination_angle = 360 - self.destination_angle;
@@ -64,7 +67,7 @@ class Cop():
 
     def update(self, dt, ferris_position):
         cop_to_ferris_distance = pow(pow(self.x - ferris_position[0], 2) + pow(self.y - ferris_position[1], 2), 0.5)
-        if cop_to_ferris_distance <= 75:
+        if cop_to_ferris_distance <= 50:
             return 1
         # if (cop_to_ferris_distance <= self.ray_length):
         #     ferris_position_cop_dependent = (ferris_position[0] - self.x, ferris_position[1] - self.y);
@@ -74,16 +77,16 @@ class Cop():
         #         return 1;
 
 
-        if (self.destination_angle != self.angle):
-            if (math.fabs(self.destination_angle - self.angle) < dt * self.rotation_speed):
-                self.angle = self.destination_angle;
+        if (self.destination_angle != self.fake_angle):
+            if (math.fabs(self.destination_angle - self.fake_angle) < dt * self.rotation_speed):
+                self.fake_angle = self.destination_angle;
             else:
-                dangle = math.copysign(dt * self.rotation_speed, self.destination_angle - self.angle);
-                self.angle += dangle;
-            if (self.angle < 0):
-                self.angle += 360;
-            if (self.angle > 360):
-                self.angle -=360;
+                dangle = math.copysign(dt * self.rotation_speed, self.destination_angle - self.fake_angle);
+                self.fake_angle += dangle;
+            if (self.fake_angle < 0):
+                self.fake_angle += 360;
+            if (self.fake_angle > 360):
+                self.fake_angle -=360;
         else:
             dx = self.direction[0] * dt * self.speed;
             dy = self.direction[1] * dt * self.speed;
