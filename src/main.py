@@ -37,7 +37,7 @@ def direction_to_vector(direction):
     if direction == DIR_STOP:
         return (0,0)
 
-def target_to_direction(position, target):
+def target_to_directions(position, target):
     """
     assuming you can go in X or Y direction, try to shorten larger of
     distances: distances in x, distances in y
@@ -47,10 +47,13 @@ def target_to_direction(position, target):
     else:
         target_dx = target[0] - position[0]
         target_dy = target[1] - position[1]
+        horizontal_direction = DIR_LEFT if target_dx < 0 else DIR_RIGHT
+        vertical_direction = DIR_UP if target_dy < 0 else DIR_DOWN
         if abs(target_dx) > abs(target_dy):
-            return DIR_LEFT if target_dx < 0 else DIR_RIGHT
+            return [horizontal_direction, vertical_direction, (horizontal_direction + 4) % 2, (vertical_direction + 4) % 2]
         else:
-            return DIR_UP if target_dy < 0 else DIR_DOWN
+            return [vertical_direction, horizontal_direction, (vertical_direction + 4) % 2, (horizontal_direction + 4) % 2]
+
 
 def get_next_position(cfg, position, direction, dt, speed):
     dx, dy = direction_to_vector(direction)
@@ -213,13 +216,19 @@ class Director:
             self.target = (500, 500)
         else:
             self.target = self.ferris.position
-        self.direction = target_to_direction(self.position, self.target)
-        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
 
-        for object in objects:
-            if aabb_collision(self.aabb(), object.aabb()):
-                self.position = (lastX, lastY)
-                return;
+        for direction in target_to_directions(self.position, self.target):
+            valid = True
+            prev_position = self.position
+            self.position = get_next_position(self.cfg, self.position, direction, dt, self.speed)
+            for object in objects:
+                if aabb_collision(self.aabb(), object.aabb()):
+                    valid = False
+                    self.position = prev_position
+                    break;
+            if valid:
+                self.direction = direction
+                break
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
@@ -264,15 +273,19 @@ class Sister:
         lastX = self.position[0]
         lastY = self.position[1]
 
-        new_direction = target_to_direction(self.position, self.target)
-        if new_direction != (self.direction + 2) % 4: # can't reverse direction
-            self.direction = new_direction
-        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
 
-        for object in objects:
-            if aabb_collision(self.aabb(), object.aabb()):
-                self.position = (lastX, lastY)
-                return
+        for direction in target_to_directions(self.position, self.target):
+            if direction == (self.direction + 2) % 4: # can't reverse direction
+                continue
+            valid = True
+            for object in objects:
+                if aabb_collision(self.aabb(), object.aabb()):
+                    valid = False
+                    break;
+            if valid:
+                self.direction = direction
+                self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+                break
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
