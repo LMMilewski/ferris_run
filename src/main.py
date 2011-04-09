@@ -391,7 +391,7 @@ class MainMenu(GameState):
         if self.menuPosition == 0:
             return FerrisRunGame(self.cfg, self.res, self.fsm)
         else:
-            return Highscores(self.cfg, self.res)
+            return Highscores(self.cfg, self.res, self.fsm)
 
 
     def process_event(self, event):
@@ -410,9 +410,10 @@ class MainMenu(GameState):
 
 
 class Highscores(GameState):
-    def __init__(self, cfg, res):
+    def __init__(self, cfg, res, fsm):
         self.cfg = cfg
         self.res = res
+        self.fsm = fsm
         self.finished = False
         self.logo = Sprite("highscoreslogo", self.res, None, ORIGIN_TOP_LEFT)
         self.highscores = self.res.get_highscores()
@@ -435,7 +436,7 @@ class Highscores(GameState):
             i += 1
 
     def next_state(self):
-        return MainMenu(self.cfg, self.res)
+        return MainMenu(self.cfg, self.res, self.fsm)
 
 
     def process_event(self, event):
