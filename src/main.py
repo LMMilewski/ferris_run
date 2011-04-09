@@ -466,6 +466,19 @@ class FerrisRunGame(GameState):
                 bonus.update(dt / self.cfg.bullet_slowdown_factor)
             else:
                 bonus.update(dt)
+                
+
+        # check collision with register        
+        if aabb_collision(self.ferris.aabb(), self.register.aabb()):        
+           self.res.sounds_play("collect")       
+           self.register = Register(self.cfg, self.res)
+       
+           self.points += 100 * (self.cfg.rich_mode_multiplier if self.rich_mode else 1)
+        
+           self.registers_left -= 1        
+           if self.registers_left <= 0:       
+               self.go_to_next_level()     
+               return                
 
         # check collision with enemies
         if not self.cfg.godmode:
