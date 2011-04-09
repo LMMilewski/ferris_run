@@ -938,6 +938,10 @@ class FerrisRunGame(GameState):
 
     def is_finished(self):
         return self.__is_finished
+    
+    def next_state(self):
+        entry = self.res.add_highscore(self.points, self.deaths)
+        return EnterHighscores(self.cfg, self.res, self.fsm, entry)        
 
 
 def main():
