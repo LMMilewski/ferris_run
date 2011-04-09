@@ -166,17 +166,21 @@ class Ferris:
                         Sprite("ferris-up", self.res, 0.5) ]
         self.speed = self.cfg.ferris_speed
         self.reset()
+        self.seen_by_cop = False
 
     def update(self, dt, cars):
         self.sprite[self.direction].update(dt)
         lastX = self.position[0]
         lastY = self.position[1]
-        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+        speed = self.speed
+        if self.seen_by_cop:
+            speed *= self.cfg.cop_slowdown_multiplier
+        self.position = get_next_position(self.cfg, self.position, self.direction, dt, speed)
         for car in cars:
             if aabb_collision(self.aabb(), car.aabb()):
                 self.position = (lastX, lastY)
                 if car.isInFront(self):
-                    self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+                    self.position = get_next_position(self.cfg, self.position, self.direction, dt, speed)
                 return;
 
     def display(self, screen):
@@ -200,9 +204,6 @@ class Ferris:
 
     def getSize(self):
         return self.sprite[self.direction].getSize()
-
-    def set_speed_cop_watch(self):
-        self.speed = self.cfg.ferris_speed_cop
 
     def get_position(self):
         return self.position;
@@ -481,11 +482,7 @@ class FerrisRunGame(GameState):
         no_of_cops_seeing_ferris = 0;
         for cop in self.cops:
             no_of_cops_seeing_ferris += cop.update(dt, self.ferris.get_position());
-
-        if no_of_cops_seeing_ferris > 0:
-            self.ferris.set_speed_cop_watch();
-        else:
-            self.ferris.set_speed_normal();
+        self.ferris.seen_by_cop = no_of_cops_seeing_ferris > 0
 
         self.hud.update(dt)
 

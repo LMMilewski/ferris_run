@@ -37,7 +37,7 @@ class Config:
         ### game specyfic options
         self.ferris_speed = 100
         self.ferris_speed_fast = 200
-        self.ferris_speed_cop = 50;
+        self.cop_slowdown_multiplier = 0.5
         self.director_speed = 60
         self.sister_speed = 70
         self.car_speed = 120

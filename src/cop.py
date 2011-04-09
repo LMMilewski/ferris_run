@@ -64,12 +64,14 @@ class Cop():
 
     def update(self, dt, ferris_position):
         cop_to_ferris_distance = pow(pow(self.x - ferris_position[0], 2) + pow(self.y - ferris_position[1], 2), 0.5)
-        if (cop_to_ferris_distance <= self.ray_length):
-            ferris_position_cop_dependent = (ferris_position[0] - self.x, ferris_position[1] - self.y);
-            dot_product = ferris_position_cop_dependent[0]*self.direction[0] + ferris_position_cop_dependent[1]*self.direction[1]
-            ferris_cop_angle = math.degrees(math.acos(dot_product/cop_to_ferris_distance));
-            if (ferris_cop_angle <= self.ray_angle/2):
-                return 1;
+        if cop_to_ferris_distance <= 75:
+            return 1
+        # if (cop_to_ferris_distance <= self.ray_length):
+        #     ferris_position_cop_dependent = (ferris_position[0] - self.x, ferris_position[1] - self.y);
+        #     dot_product = ferris_position_cop_dependent[0]*self.direction[0] + ferris_position_cop_dependent[1]*self.direction[1]
+        #     ferris_cop_angle = math.degrees(math.acos(dot_product/cop_to_ferris_distance));
+        #     if (ferris_cop_angle <= self.ray_angle/2):
+        #         return 1;
 
 
         if (self.destination_angle != self.angle):
