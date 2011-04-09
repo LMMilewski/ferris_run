@@ -50,7 +50,7 @@ class Sprite:
         elif self.draw_origin == ORIGIN_CENTER:
             x,y = position
             return (x-w/2, y-h/2)
-        
+
     def getSize(self):
         return self.current_frame().get_size()
 
@@ -62,4 +62,4 @@ class Sprite:
             return (x, y, x + w, y + h)
         elif self.draw_origin == ORIGIN_CENTER:
             x,y = position
-            return (x-w/2, y-h/2, x+w/2, y+h/2)
+            return (x-w/2+2, y-h/2+2, x+w/2-4, y+h/2-4)
