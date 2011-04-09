@@ -517,10 +517,9 @@ class FerrisRunGame(GameState):
         self.timeoffset = [10, 3]
         self.currentOffset = 1
         self.last_keys = []
-        self.cops = [Cop(260, 170, 390, 170)]
+
+        self.cops = []
         self.cop_sprites = pygame.sprite.Group()
-        for cop in self.cops:
-            self.cop_sprites.add(cop.GetSprite());
 
         self.inited = False
 
@@ -573,6 +572,22 @@ class FerrisRunGame(GameState):
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
             bonus.reset()
+        if self.level_num == 5:
+            cop = Cop(260, 170, 390, 170)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
+        if self.level_num == 6:
+            cop = Cop(270, 480, 390, 480)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
+        if self.level_num == 7:
+            cop = Cop(490, 265, 490, 385)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
+        if self.level_num == 8:
+            cop = Cop(170, 275, 170, 375)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
 
     def die(self):
         self.blood_positions.append(self.ferris.position)
