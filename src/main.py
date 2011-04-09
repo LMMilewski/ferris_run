@@ -324,7 +324,7 @@ class Register:
         self.sprite = Sprite("register", self.res, 0.25)
 
         while True:
-            position = random.integer(20,580), random.integer(20,580)
+            position = random.randint(20,580), random.randint(20,580)
             if position[0] < 20 or position[1] < 20:
                 continue
             if 160 <= position[0] and position[0] <= 220:
@@ -354,8 +354,6 @@ class FerrisRunGame(GameState):
     def __init__(self, cfg, res):
         self.cfg = cfg
         self.res = res
-
-        random.init()
 
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
