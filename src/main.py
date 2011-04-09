@@ -354,6 +354,96 @@ class Register:
     def aabb(self):
         return self.sprite.aabb(self.position)
 
+class MainMenu(GameState):
+    def __init__(self, cfg, res):
+        self.cfg = cfg
+        self.res = res  
+        self.logo = Sprite("logo", self.res, None, ORIGIN_TOP_LEFT)
+        self.sprites = [Sprite("sister-right", res, 0.1), Sprite("director-right", res, 0.1), Sprite("ferris-right", res, 0.1)]
+        self.positions = [[0, 90], [30, 90], [100, 90]]
+        self.bubble = Sprite("SpeechBubble", self.res)
+        self.startGame = [Sprite("startgame1", self.res, None, ORIGIN_TOP_LEFT), Sprite("startgame0", self.res, None, ORIGIN_TOP_LEFT)]
+        self.highscores = [Sprite("highscores1", self.res, None, ORIGIN_TOP_LEFT), Sprite("highscores0", self.res, None, ORIGIN_TOP_LEFT)]
+        self.menuPosition = 0
+        self.finished = False
+      
+    def update(self, dt):
+        for person in self.sprites:
+            person.update(dt)
+        for pos in self.positions:
+            pos[0] += 50 * dt
+            if pos[0] > self.cfg.resolution[0]:
+                pos[0] = 0
+      
+    def display(self, screen):
+        screen.fill((239, 239, 239))
+        self.logo.display(screen, (0,100))
+        for i in range(0, len(self.sprites)):
+            self.sprites[i].display(screen, self.positions[i])
+        if self.positions[1][0] > 100 and self.positions[1][0] < 300:
+            self.bubble.display(screen, (self.positions[1][0] + 40, 30))
+            
+        self.startGame[self.menuPosition].display(screen, (300, 300))
+        self.highscores[1 - self.menuPosition].display(screen, (300, 350))
+            
+    def next_state(self):
+        if self.menuPosition == 0:
+            return FerrisRunGame(self.cfg, self.res)    
+        else:
+            return Highscores(self.cfg, self.res)
+                    
+            
+    def process_event(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self.finish()
+            if event.key == K_UP:
+                self.menuPosition = (self.menuPosition + 1) % 2
+            if event.key == K_DOWN:
+                self.menuPosition = (self.menuPosition + 1) % 2           
+            if event.key == K_RETURN:
+                self.finished = True
+                
+    def is_finished(self):
+        return self.finished                
+
+
+class Highscores(GameState):
+    def __init__(self, cfg, res):
+        self.cfg = cfg
+        self.res = res  
+        self.finished = False
+        self.logo = Sprite("highscoreslogo", self.res, None, ORIGIN_TOP_LEFT)
+        self.highscores = self.res.get_highscores()            
+        
+    def update(self, dt):
+        pass
+      
+    def display(self, screen):
+        screen.fill((239, 239, 239))
+        self.logo.display(screen, (0,0))
+        
+        position = 180
+        i = 1
+        label = self.res.font_render("LESSERCO", 36, "name   scores   deaths", color.by_name["black"])
+        screen.blit(label, (300, 150))    
+        for entry in self.highscores:
+            label = self.res.font_render("LESSERCO", 36, str(i) + "." + entry["name"] + "\t" + entry["points"] + "\t" + entry["deaths"], color.by_name["black"])
+            screen.blit(label, (300, position))    
+            position += 30
+            i += 1    
+            
+    def next_state(self):
+        return MainMenu(self.cfg, self.res)    
+                    
+            
+    def process_event(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self.finished = True
+                      
+    def is_finished(self):
+        return self.finished    
 
 class FerrisRunGame(GameState):
     def __init__(self, cfg, res, fsm):
@@ -785,6 +875,6 @@ def main():
     fsm = GameFsm(cfg)
     res = Resources(cfg).load_all()
     pygame.display.set_caption(cfg.app_name)
-    game_state = FerrisRunGame(cfg,res,fsm)
+    game_state = MainMenu(cfg,res)
     fsm.set_state(game_state)
     fsm.run()

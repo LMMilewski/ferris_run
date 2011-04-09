@@ -27,9 +27,10 @@ class Config:
         ## paths
         base_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         self.__path={}
-        for data_type in ("gfx", "sounds", "music", "font"):
+        for data_type in ("gfx", "sounds", "music", "font", "highscores"):
             self.__path[data_type] = os.path.join(base_path, data_type)
 
+        self.highscores_path =  os.path.join(base_path, "highscores")
         # you can't inline __add_path_getter method because in python
         # closures are created by function calls
         for k, v in self.__path.items():
@@ -57,6 +58,9 @@ class Config:
         self.infinite_bonus_sequence = [K_d, K_n, K_k, K_r, K_o, K_z] # + cheat_mode enabled
         self.answer = False
         self.answer_sequence = [K_a, K_n, K_s, K_w, K_e, K_r, K_t, K_o, K_l, K_i, K_f, K_e, K_u, K_n, K_i, K_v, K_e, K_r, K_s, K_e, K_a, K_n, K_d, K_e, K_v, K_e, K_r, K_y, K_t, K_h, K_i, K_n, K_g] # + cheat_mode enabled
+        self.highscore_entries = 10
+        self.highscore_delimiter = "-"
+        self.highscore_entry_delimiter = "|"
 
     def __add_path_getter(self, k, v):
             setattr(Config,

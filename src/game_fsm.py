@@ -17,7 +17,7 @@ class GameState:
     def init(self, screen):
         pass
 
-    def update(serlf, dt):
+    def update(self, dt):
         pass
 
     def process_event(self, event):
