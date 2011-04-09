@@ -12,5 +12,7 @@ RIGHT = (1, 0)
 UP = (0, -1)
 DOWN = (0, 1)
 
+opposite = {LEFT:set([UP, DOWN]), RIGHT:set([UP, DOWN]), UP:set([LEFT, RIGHT]), DOWN:set([LEFT, RIGHT])}
+
 WIDTH = 800
 HEIGHT = 600

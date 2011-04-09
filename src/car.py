@@ -73,22 +73,35 @@ class Car:
     def __V__(self, dx):
         return 0.5 * math.tanh(dx - self.safeDistance) + 0.5
     
-    def update(self, dt):
+    def update(self, dt, cars, enemies):
         self.sprite.update(dt)
-        if self.collides:
-            self.collides = False
-            return
-        if self.objectAhead:        
-            
+        lastX = self.position[0]
+        lastY = self.position[1]
+        if self.objectAhead:                    
             a = self.__V__(self.getDistance(self.objectAhead)) * self.maxVelocity - self.velocity
             if a < 0:
                 self.acceleration = a
             else:
                 self.acceleration = self.sensitivity * a
         self.velocity = max(0, min(self.maxVelocity, self.velocity + self.acceleration))
-        x = self.position[0] + self.velocity * self.direction[0] * dt
-        y = self.position[1] + self.velocity * self.direction[1] * dt
-        self.setPosition(x, y)
+        if self.velocity > 0.05:
+            x = self.position[0] + self.velocity * self.direction[0] * dt
+            y = self.position[1] + self.velocity * self.direction[1] * dt
+            self.setPosition(x, y)
+            aabb = self.aabb()
+            for c in cars:
+                if c.direction in const.opposite[self.direction] and self.aabb_collision(aabb, c.aabb()):
+                    self.setPosition(lastX, lastY)
+                    return      
+            for e in enemies:
+                if self.aabb_collision(aabb, e.aabb()):
+                    self.setPosition(lastX, lastY)
+                    return                        
+
+    def aabb_collision(self, (minx1, miny1, maxx1, maxy1), (minx2, miny2, maxx2, maxy2)):
+        xcollision = (minx1 <= minx2 and minx2 <= maxx1) or (minx2 <= minx1 and minx1 <= maxx2)
+        ycollision = (miny1 <= miny2 and miny2 <= maxy1) or (miny2 <= miny1 and miny1 <= maxy2)
+        return xcollision and ycollision
             
     def display(self, screen):
         self.sprite.display(screen, self.getPosition())            
@@ -105,13 +118,24 @@ class Car:
         
     
     def aabb(self):
-        return (self.position[0] + 2, self.position[1] + 2, self.position[0] + self.size[0] - 4, self.position[1] + self.size[1] - 4)
+        return (self.position[0], self.position[1], self.position[0] + self.size[0], self.position[1] + self.size[1])
     
     def getSize(self):
         return self.size      
+    
+    def isInFront(self, object):
+        ycollision = (self.position[1] <= object.getPosition()[1] and object.getPosition()[1] <= self.position[1] + self.getSize()[1]) or (object.getPosition()[1] <= self.position[1] and self.position[1] <= object.getPosition()[1] + object.getSize()[1])
+        xcollision = (self.position[0] <= object.getPosition()[0] and object.getPosition()[0] <= self.position[0] + self.getSize()[0]) or (object.getPosition()[0] <= self.position[0] and self.position[0] <= object.getPosition()[0] + object.getSize()[0])
         
-    def collision(self, object):
-        self.collides = True
+        if self.direction == const.LEFT and ycollision and object.getPosition()[0] < self.position[0]:
+            return True 
+        elif self.direction == const.RIGHT and ycollision and object.getPosition()[0] + object.getSize()[0] > self.position[0] + self.size[0]:
+            return True
+        elif self.direction == const.UP and xcollision and object.getPosition()[1] < self.position[1]:
+            return True
+        elif self.direction == const.DOWN and xcollision and object.getPosition()[1] + object.getSize()[1] > self.position[1] + self.size[1]:
+            return True        
         
+        return False
         
         

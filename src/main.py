@@ -84,7 +84,6 @@ class Bonus:
         self.time_left = self.cfg.bonus_duration
 
     def activate(self):
-        self.active = True
         self.command()
 
     def deactivate(self):
@@ -118,9 +117,17 @@ class Ferris:
         self.speed = self.cfg.ferris_speed
         self.reset()
 
-    def update(self, dt):
+    def update(self, dt, cars):
         self.sprite[self.direction].update(dt)
+        lastX = self.position[0]
+        lastY = self.position[1]
         self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+        for car in cars:
+            if aabb_collision(self.aabb(), car.aabb()):
+                self.position = (lastX, lastY)        
+                if car.isInFront(self):
+                    self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)     
+                return;       
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
@@ -137,6 +144,12 @@ class Ferris:
 
     def set_speed_fast(self):
         self.speed = self.cfg.ferris_speed_fast
+        
+    def getPosition(self):
+        return self.sprite[self.direction].getPosition(self.position)
+
+    def getSize(self):
+        return self.sprite[self.direction].getSize()         
 
 # should refactor? the code is the same as Ferris's and other guys
 class Director:
@@ -154,11 +167,20 @@ class Director:
         self.position = (500,500)
         self.target = None
 
-    def update(self, dt):
+    def update(self, dt, objects):
         self.sprite[self.direction].update(dt)
+        
+        lastX = self.position[0]
+        lastY = self.position[1]
+        
         self.target = self.ferris.position
         self.direction = direction_to_target(self.position, self.target)
         self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+        
+        for object in objects:
+            if aabb_collision(self.aabb(), object.aabb()):
+                self.position = (lastX, lastY)                
+                return;        
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
@@ -170,7 +192,7 @@ class Director:
         return self.sprite[self.direction].getPosition(self.position)
 
     def getSize(self):
-        return self.sprite[self.direction].getSize()
+        return self.sprite[self.direction].getSize()     
 
 
 class Sister:
@@ -178,7 +200,7 @@ class Sister:
         self.cfg = cfg
         self.res = res
         self.ferris = ferris
-
+        
         self.sprite = [ Sprite("sister-left", self.res, 0.25),
                         Sprite("sister-down", self.res, 0.25),
                         Sprite("sister-right", self.res, 0.25),
@@ -188,7 +210,7 @@ class Sister:
         self.position = (100,100)
         self.target = None
 
-    def update(self, dt):
+    def update(self, dt, objects):
         self.sprite[self.direction].update(dt)
 
         if distance(self.ferris.position, self.position) < 70:
@@ -197,10 +219,18 @@ class Sister:
             ferris_dir = direction_to_vector(self.ferris.direction)
             self.target = self.ferris.position[0] + ferris_dir[0] * 80, self.ferris.position[1] + ferris_dir[1] * 80
 
+        lastX = self.position[0]
+        lastY = self.position[1]
+
         new_direction = direction_to_target(self.position, self.target)
         if new_direction != (self.direction + 2) % 4: # can't reverse direction
             self.direction = new_direction
         self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
+        
+        for object in objects:
+            if aabb_collision(self.aabb(), object.aabb()):
+                self.position = (lastX, lastY)
+                return        
 
     def display(self, screen):
         self.sprite[self.direction].display(screen, self.position)
@@ -212,7 +242,7 @@ class Sister:
         return self.sprite[self.direction].getPosition(self.position)
 
     def getSize(self):
-        return self.sprite[self.direction].getSize()
+        return self.sprite[self.direction].getSize() 
 
 class Register:
     def __init__(self, cfg, res):
@@ -244,31 +274,7 @@ class Register:
     def aabb(self):
         return self.sprite.aabb(self.position)
 
-class Car:
-    def __init__(self, cfg, res, position, direction, color):
-        self.cfg = cfg
-        self.res = res
 
-        self.position = position
-        self.direction = direction
-        self.color = color
-
-        self.sprite = [ Sprite("car-left-"+color, self.res),
-                        Sprite("car-down-"+color, self.res),
-                        Sprite("car-right-"+color, self.res),
-                        Sprite("car-up-"+color, self.res) ]
-
-        self.speed = self.cfg.car_speed
-
-    def update(self, dt):
-        self.sprite[self.direction].update(dt)
-        self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
-
-    def display(self, screen):
-        self.sprite[self.direction].display(screen, self.position)
-
-    def aabb(self):
-        return self.sprite[self.direction].aabb(self.position)
 
 
 class FerrisRunGame(GameState):
@@ -353,7 +359,7 @@ class FerrisRunGame(GameState):
     def set_level(self, level_num):
         self.level_num = level_num
         self.reset_level()
-     #   self.res.music_play("level_background")
+        self.res.music_play("level_background")
         self.res.sounds_play("level_start")
         self.registers_left = self.cfg.registers_per_level
 
@@ -361,6 +367,7 @@ class FerrisRunGame(GameState):
         self.ferris.reset()
         self.director = Director(self.cfg, self.res, self.ferris)
         self.sister = Sister(self.cfg, self.res, self.ferris)
+        self.enemies = [self.director, self.sister] + self.cars
         self.stopped = True
 
     def go_to_next_level(self):
@@ -368,6 +375,11 @@ class FerrisRunGame(GameState):
         for bonus in self.bonuses:
             bonus.deactivate()
             bonus.reset()
+            
+    def die(self):
+        self.res.sounds_play("die")
+        self.deaths += 1
+        self.reset_level()       
 
     def update(self, dt):
         self.dt = dt
@@ -380,18 +392,18 @@ class FerrisRunGame(GameState):
 
         self.background.update(dt)
 
-        for car in self.cars:
-            car.update(dt)
+        for car in self.cars:   
+            car.update(dt, self.cars, [self.director, self.sister])
 
         self.hud.update(dt)
 
         # update all objects
         if self.bullet_time:
-            self.ferris.update(dt / self.cfg.bullet_slowdown_factor)
+            self.ferris.update(dt / self.cfg.bullet_slowdown_factor, self.cars)
         else:
-            self.ferris.update(dt)
-        self.director.update(dt)
-        self.sister.update(dt)
+            self.ferris.update(dt, self.cars)
+        self.director.update(dt, self.cars)
+        self.sister.update(dt, self.cars)
         self.register.update(dt)
         for bonus in self.bonuses:
             if self.bullet_time:
@@ -411,19 +423,12 @@ class FerrisRunGame(GameState):
 
         # check collision with enemies
         if not self.cfg.godmode:
-            enemies = [self.director, self.sister] + self.cars
-            for enemy in enemies:
+            #enemies = [self.director, self.sister]
+            for enemy in self.enemies:
                 if aabb_collision(self.ferris.aabb(), enemy.aabb()):
-                    self.res.sounds_play("die")
-                    self.deaths += 1
-                    self.reset_level()
+                    self.die()
                     return
-
-        for car in self.cars:
-            if aabb_collision(self.director.aabb(), car.aabb()):
-                car.collision(self.director)
-            if aabb_collision(self.sister.aabb(), car.aabb()):
-                car.collision(self.sister)
+                                             
 
         self.time += dt
         if self.time > self.lasttime + self.timeoffset[self.currentOffset]:
