@@ -37,7 +37,7 @@ def direction_to_vector(direction):
     if direction == DIR_STOP:
         return (0,0)
 
-def direction_to_target(position, target):
+def target_to_direction(position, target):
     """
     assuming you can go in X or Y direction, try to shorten larger of
     distances: distances in x, distances in y
@@ -213,7 +213,7 @@ class Director:
             self.target = (500, 500)
         else:
             self.target = self.ferris.position
-        self.direction = direction_to_target(self.position, self.target)
+        self.direction = target_to_direction(self.position, self.target)
         self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
         
         for object in objects:
@@ -264,7 +264,7 @@ class Sister:
         lastX = self.position[0]
         lastY = self.position[1]
 
-        new_direction = direction_to_target(self.position, self.target)
+        new_direction = target_to_direction(self.position, self.target)
         if new_direction != (self.direction + 2) % 4: # can't reverse direction
             self.direction = new_direction
         self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
