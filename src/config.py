@@ -44,7 +44,8 @@ class Config:
         self.board_size = 600,600
         self.registers_per_level = 9
         self.bonus_duration = 10
-        self.bonus_count = 2        self.bullet_slowdown_factor = 0.5
+        self.bonus_count = 2
+        self.bullet_slowdown_factor = 0.5
         self.rich_mode_multiplier = 2
         self.cheat_mode = '--cheatmode' in sys.argv
         self.cheat_sequence = [K_UP, K_UP, K_DOWN, K_DOWN, K_LEFT, K_RIGHT, K_LEFT, K_RIGHT, K_a, K_b]
