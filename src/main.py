@@ -407,7 +407,7 @@ class FerrisRunGame(GameState):
     def set_level(self, level_num):
         self.level_num = level_num
         self.reset_level()
-        #self.res.music_play("level_background")
+        self.res.music_play("level_background")
         self.res.sounds_play("level_start")
         self.registers_left = self.cfg.registers_per_level
 
