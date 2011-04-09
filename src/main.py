@@ -270,7 +270,7 @@ class Sister:
     def __init__(self, cfg, res, ferris):
         self.cfg = cfg
         self.res = res
-        self.ferris = ferris   
+        self.ferris = ferris
         self.sprite = [ Sprite("sister-left", self.res, 0.1),
                         Sprite("sister-down", self.res, 0.1),
                         Sprite("sister-right", self.res, 0.1),
