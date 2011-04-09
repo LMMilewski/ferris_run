@@ -512,7 +512,7 @@ class FerrisRunGame(GameState):
             self.ferris.update(dt / self.cfg.bullet_slowdown_factor, self.cars)
         else:
             self.ferris.update(dt, self.cars)
-        self.director.update(dt, self.cars)
+        self.director.update(dt if self.level_num > 1 else dt * 0.5, self.cars)
         self.sister.update(dt, self.cars)
         self.register.update(dt)
         for bonus in self.bonuses:
