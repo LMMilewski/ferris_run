@@ -357,7 +357,7 @@ class Register:
 class MainMenu(GameState):
     def __init__(self, cfg, res, fsm):
         self.cfg = cfg
-        self.res = res  
+        self.res = res
         self.fsm = fsm
 
         self.logo = Sprite("logo", self.res, None, ORIGIN_TOP_LEFT)
@@ -394,7 +394,7 @@ class MainMenu(GameState):
         if self.exit:
             return GameState.next_state(self)
         if self.menuPosition == 0:
-            return FerrisRunGame(self.cfg, self.res, self.fsm)    
+            return FerrisRunGame(self.cfg, self.res, self.fsm)
         else:
             return Highscores(self.cfg, self.res, self.fsm)
 
@@ -408,20 +408,20 @@ class MainMenu(GameState):
             elif event.key == K_UP:
                 self.menuPosition = (self.menuPosition + 1) % 2
             elif event.key == K_DOWN:
-                self.menuPosition = (self.menuPosition + 1) % 2           
+                self.menuPosition = (self.menuPosition + 1) % 2
             elif event.key == K_DOWN:
                 self.menuPosition = (self.menuPosition + 1) % 2
             elif event.key == K_RETURN:
                 self.finished = True
 
     def is_finished(self):
-        return self.finished            
+        return self.finished
 
 
 class Highscores(GameState):
     def __init__(self, cfg, res, fsm):
         self.cfg = cfg
-        self.res = res  
+        self.res = res
         self.fsm = fsm
         self.finished = False
         self.logo = Sprite("highscoreslogo", self.res, None, ORIGIN_TOP_LEFT)
@@ -440,26 +440,29 @@ class Highscores(GameState):
         screen.blit(label, (300, 150))
         for entry in self.highscores:
             label = self.res.font_render("LESSERCO", 36, str(i) + "." + entry["name"] + "\t" + str(entry["points"]) + "\t" + str(entry["deaths"]), color.by_name["black"])
-            screen.blit(label, (300, position))    
+            screen.blit(label, (300, position))
             position += 30
             i += 1
 
     def next_state(self):
-        return MainMenu(self.cfg, self.res, self.fsm)    
-                    
-            
+        return MainMenu(self.cfg, self.res, self.fsm)
+
+
     def process_event(self, event):
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 self.finished = True
-                      
+
     def is_finished(self):
-        return self.finished    
+        return self.finished
 
 class EnterHighscores(Highscores):
     def __init__(self, cfg, res, fsm, entry):
         Highscores.__init__(self, cfg, res, fsm)
         self.entry = entry
+
+    def next_state(self):
+        return MainMenu(self.cfg, self.res, self.fsm)
 
     def process_event(self, event):
         if event.type == KEYDOWN:
@@ -471,8 +474,6 @@ class EnterHighscores(Highscores):
                 keyPress = event.key
                 if keyPress >= 32 and keyPress <= 126 and len(self.entry["name"]) <= self.cfg.nick_length:
                     self.entry["name"] += chr(keyPress)
-                
-                      
 
     def is_finished(self):
         return self.finished
@@ -547,10 +548,9 @@ class FerrisRunGame(GameState):
         self.timeoffset = [10, 3]
         self.currentOffset = 1
         self.last_keys = []
-        self.cops = [Cop(260, 170, 390, 170)]
+
+        self.cops = []
         self.cop_sprites = pygame.sprite.Group()
-        for cop in self.cops:
-            self.cop_sprites.add(cop.GetSprite());
 
         self.inited = False
 
@@ -603,11 +603,28 @@ class FerrisRunGame(GameState):
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
             bonus.reset()
-            
+
+        if self.level_num == 5:
+            cop = Cop(260, 170, 390, 170)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
+        if self.level_num == 6:
+            cop = Cop(270, 480, 390, 480)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
+        if self.level_num == 7:
+            cop = Cop(490, 265, 490, 385)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
+        if self.level_num == 8:
+            cop = Cop(170, 275, 170, 375)
+            self.cops.append(cop)
+            self.cop_sprites.add(cop.GetSprite())
+
         if self.level_num > 9:
             entry = self.res.add_highscore(self.points, self.deaths)
-            self.fsm.set_state(EnterHighscores(self.cfg, self.res, self.fsm, entry))            
-            
+            self.fsm.set_state(EnterHighscores(self.cfg, self.res, self.fsm, entry))
+
 
     def die(self):
         self.blood_positions.append(self.ferris.position)
@@ -921,7 +938,7 @@ class FerrisRunGame(GameState):
 
     def is_finished(self):
         return self.__is_finished
-         
+
 
 def main():
     cfg = Config()
