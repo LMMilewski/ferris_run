@@ -460,10 +460,6 @@ class EnterHighscores(Highscores):
     def __init__(self, cfg, res, fsm, entry):
         Highscores.__init__(self, cfg, res, fsm)
         self.entry = entry
-                    
-            
-        return MainMenu(self.cfg, self.res, self.fsm)
-
 
     def process_event(self, event):
         if event.type == KEYDOWN:
@@ -477,6 +473,7 @@ class EnterHighscores(Highscores):
                     self.entry["name"] += chr(keyPress)
                 
                       
+
     def is_finished(self):
         return self.finished
 
@@ -931,7 +928,7 @@ def main():
     fsm = GameFsm(cfg)
     res = Resources(cfg).load_all()
     pygame.display.set_caption(cfg.app_name)
-    game_state = MainMenu(cfg,res, fsm)
+    game_state = MainMenu(cfg,res,fsm)
     fsm.set_state(game_state)
     fsm.run()
     res.save_highscores()
