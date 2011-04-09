@@ -501,6 +501,16 @@ class FerrisRunGame(GameState):
         self.stopped = True # the game is not playing right now (characters don't move etc)
 
         self.answer = Sprite("answer", self.res)
+        self.pause_sprite = [ Sprite("tutorial-level-1", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("tutorial-level-1", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("tutorial-level-2", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("tutorial-level-3", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("tutorial-level-4", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("tutorial-level-5", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("paused", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("paused", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("paused", self.res, None, ORIGIN_TOP_LEFT),
+                              Sprite("paused", self.res, None, ORIGIN_TOP_LEFT) ]
 
         self.teleport_sprite = Sprite("teleport_area", self.res, None, ORIGIN_TOP_LEFT)
         self.teleporting = False
@@ -894,22 +904,9 @@ class FerrisRunGame(GameState):
         self.cop_sprites.update();
         self.cop_sprites.draw(screen);
 
-        
         # pause menu
         if self.stopped:
-            dark = pygame.Surface(self.cfg.screen_resolution).convert_alpha()
-            dark.fill((0,0,0,200))
-            screen.blit(dark, (0,0))
-            stopped_text = self.res.font_render("LESSERCO", 90, "THE GAME IS PAUSED", color.by_name["red"])
-            screen.blit(stopped_text, (110,200))
-            anykey_text = self.res.font_render("LESSERCO", 36, "Please press any key to start", color.by_name["red"])
-            screen.blit(anykey_text, (160,270))
-            arrows_text = self.res.font_render("LESSERCO", 36, "You are in center. Use arrows to move", color.by_name["red"])
-            screen.blit(arrows_text, (110,350))
-            avoid_text = self.res.font_render("LESSERCO", 36, "Avoid cars, director and sister", color.by_name["red"])
-            screen.blit(avoid_text, (110,400))
-            collect_text = self.res.font_render("LESSERCO", 36, "Collect dictionaries (stars)", color.by_name["red"])
-            screen.blit(collect_text, (110,450))
+            self.pause_sprite[self.level_num].display(screen, (0,0))
 
         if self.teleporting and not self.stopped:
             pygame.mouse.set_visible(True)
