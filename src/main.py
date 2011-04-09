@@ -270,21 +270,19 @@ class Sister:
                 ferris_dir = direction_to_vector(self.ferris.direction)
                 self.target = self.ferris.position[0] + ferris_dir[0] * 80, self.ferris.position[1] + ferris_dir[1] * 80
 
-        lastX = self.position[0]
-        lastY = self.position[1]
-
-
         for direction in target_to_directions(self.position, self.target):
             if direction == (self.direction + 2) % 4: # can't reverse direction
                 continue
             valid = True
+            prev_position = self.position
+            self.position = get_next_position(self.cfg, self.position, direction, dt, self.speed)
             for object in objects:
                 if aabb_collision(self.aabb(), object.aabb()):
                     valid = False
+                    self.position = prev_position
                     break;
             if valid:
                 self.direction = direction
-                self.position = get_next_position(self.cfg, self.position, self.direction, dt, self.speed)
                 break
 
     def display(self, screen):
