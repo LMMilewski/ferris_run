@@ -586,6 +586,9 @@ class FerrisRunGame(GameState):
         if self.stopped:
             return
 
+        if self.teleporting:
+            return
+
         self.background.update(dt)
 
         for car in self.cars:
