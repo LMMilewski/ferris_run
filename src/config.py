@@ -45,6 +45,7 @@ class Config:
         self.registers_per_level = 9
         self.bonus_duration = 10
         self.bonus_count = 2
+        self.remote_gather_radius = 100
         self.bullet_slowdown_factor = 0.5
         self.rich_mode_multiplier = 2
         self.cheat_mode = '--cheatmode' in sys.argv

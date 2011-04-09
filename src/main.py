@@ -87,6 +87,10 @@ class BonusWithTimer:
         self.reset()
         self.type = "timer"
 
+    def on_add(self):
+        if self.passive:
+            self.activate()
+
     def activate(self):
         if not self.active:
             self.active = True
@@ -112,11 +116,10 @@ class BonusWithTimer:
 
     def reset(self):
         self.finished = False
+        self.active = False
         if self.passive:
-            self.active = True
             self.time_left = "passive"
             return
-        self.active = False
         self.time_left = self.cfg.bonus_duration
 
 class BonusWithCounter:
@@ -129,6 +132,9 @@ class BonusWithCounter:
         self.reset()
         self.active = False
         self.type = "counter"
+
+    def on_add(self):
+        pass
 
     def activate(self):
         if self.count_left > 0:
@@ -499,7 +505,7 @@ class FerrisRunGame(GameState):
 
 
         # check collision with register
-        if aabb_collision(self.ferris.aabb(), self.register.aabb()):
+        if self.collision_with_register():
            self.res.sounds_play("collect")
            self.register = Register(self.cfg, self.res)
 
@@ -529,6 +535,12 @@ class FerrisRunGame(GameState):
                 lane.changeState()
 
         self.allsprites.update()
+
+    def collision_with_register(self):
+        if self.remote_gather:
+            return distance(self.ferris.position, self.register.position) < self.cfg.remote_gather_radius
+        else:
+            return aabb_collision(self.ferris.aabb(), self.register.aabb())
 
     def bullet_time_on(self):
         self.bullet_time = True
@@ -565,7 +577,7 @@ class FerrisRunGame(GameState):
     def remote_gather_on(self):
         self.remote_gather = True
 
-    def remote_gather_off(self):
+    def remote_gather_off(self): # this is passive, always active
         pass
 
     def pick_register(self):
@@ -624,8 +636,12 @@ class FerrisRunGame(GameState):
             if self.cfg.cheat_mode:
                 if event.key == K_7:
                     self.bonuses = self.possible_bonuses[0]
+                    for bonus in self.bonuses:
+                        bonus.on_add()
                 if event.key == K_8:
                     self.bonuses = self.possible_bonuses[1]
+                    for bonus in self.bonuses:
+                        bonus.on_add()
                 if event.key == K_9:
                     self.go_to_next_level()
                 if event.key == K_0:
