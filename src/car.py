@@ -7,7 +7,7 @@ class Car:
     
 
     
-    cars = ['redcar-', 'whitecar-', 'yellowcar-']
+    cars = ['redcar-', 'bluecar-', 'yellowcar-']
     dirs = {const.LEFT:"left", const.UP:"up", const.RIGHT:"right", const.DOWN:"down"} 
     
     def __init__(self, maxVelocity, direction, optimalDistance, cfg, res):        
