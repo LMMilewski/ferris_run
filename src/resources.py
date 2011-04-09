@@ -118,18 +118,18 @@ class Resources:
         self.__blend_animation_with_color("car-down-white", "car-down-green", color.by_name["green"])
         self.__blend_animation_with_color("car-right-white", "car-right-green", color.by_name["green"])
         self.__blend_animation_with_color("car-up-white", "car-up-green", color.by_name["green"])
-        
+
         self.__map_animation_frames("redcar-right", "redcar-up",  self.__rotate_image(90))
         self.__map_animation_frames("redcar-right", "redcar-left", self.__rotate_image(180))
-        self.__map_animation_frames("redcar-right", "redcar-down",    self.__rotate_image(270))        
-        
+        self.__map_animation_frames("redcar-right", "redcar-down",    self.__rotate_image(270))
+
         self.__map_animation_frames("bluecar-right", "bluecar-up",  self.__rotate_image(90))
         self.__map_animation_frames("bluecar-right", "bluecar-left", self.__rotate_image(180))
-        self.__map_animation_frames("bluecar-right", "bluecar-down",    self.__rotate_image(270))   
-        
+        self.__map_animation_frames("bluecar-right", "bluecar-down",    self.__rotate_image(270))
+
         self.__map_animation_frames("yellowcar-right", "yellowcar-up",  self.__rotate_image(90))
         self.__map_animation_frames("yellowcar-right", "yellowcar-left", self.__rotate_image(180))
-        self.__map_animation_frames("yellowcar-right", "yellowcar-down",    self.__rotate_image(270))   
+        self.__map_animation_frames("yellowcar-right", "yellowcar-down",    self.__rotate_image(270))
 
         # use __blend_animation_with_color to change color of the
         # sprite. You can use it for very simple skins
@@ -141,7 +141,8 @@ class Resources:
         # load 'main.ttf' file)
         # add fonts in format
         # (fontname, fontsize)
-        files = [("LESSERCO", 36),
+        files = [("LESSERCO", 24),
+                 ("LESSERCO", 36),
                  ("LESSERCO", 90)]
         for file in files:
             self.load_font_file(file[0], file[1])

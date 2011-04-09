@@ -15,6 +15,8 @@ from car import Car
 from traffic_light import TrafficLight
 from cop import Cop, CopSprite
 
+from choose_upgrade import *
+
 def aabb_collision((minx1, miny1, maxx1, maxy1), (minx2, miny2, maxx2, maxy2)):
     xcollision = (minx1 <= minx2 and minx2 <= maxx1) or ((minx2 <= minx1 and minx1 <= maxx2))
     ycollision = (miny1 <= miny2 and miny2 <= maxy1) or ((miny2 <= miny1 and miny1 <= maxy2))
@@ -74,12 +76,13 @@ def get_next_position(cfg, position, direction, dt, speed):
 
 
 class BonusWithTimer:
-    def __init__(self, cfg, res, command, undo_command, name, passive = False):
+    def __init__(self, cfg, res, command, undo_command, name, description, passive = False):
         """ if the bonus is passive (passive = True) then the bonus is never deactivated
         """
         self.cfg = cfg
         self.res = res
         self.command = command
+        self.description = description
         self.passive = passive
         self.undo_command = undo_command
         self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
@@ -123,10 +126,11 @@ class BonusWithTimer:
         self.time_left = self.cfg.bonus_duration
 
 class BonusWithCounter:
-    def __init__(self, cfg, res, command, name):
+    def __init__(self, cfg, res, command, name, description):
         self.cfg = cfg
         self.res = res
         self.command = command
+        self.description = description
         self.sprite = Sprite(name + "-mini", self.res, None, ORIGIN_TOP_LEFT)
         self.sprite_dark = Sprite(name + "-mini-dark", self.res, None, ORIGIN_TOP_LEFT)
         self.reset()
@@ -352,9 +356,10 @@ class Register:
 
 
 class FerrisRunGame(GameState):
-    def __init__(self, cfg, res):
+    def __init__(self, cfg, res, fsm):
         self.cfg = cfg
         self.res = res
+        self.fsm = fsm
 
         self.__is_finished = False
         self.level_num = None # set in set_level called from init
@@ -423,7 +428,12 @@ class FerrisRunGame(GameState):
         for cop in self.cops:
             self.cop_sprites.add(cop.GetSprite());
 
+        self.inited = False
+
     def init(self, screen):
+        if self.inited:
+            return
+        self.inited = True
         self.bullet_time = False
         self.rich_mode = False
         self.ferris = Ferris(self.cfg, self.res)
@@ -432,15 +442,15 @@ class FerrisRunGame(GameState):
 
     def define_possible_bonuses(self):
         self.possible_bonuses = [
-            [ BonusWithTimer(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed"),
-              BonusWithTimer(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow"),
-              BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich"),
-              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee"), ],
-            [ BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights"),
-              BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick"),
-              BonusWithTimer(self.cfg, self.res, self.remote_gather_on, self.remote_gather_off, "bonus-remote-gather", True),
-              BonusWithCounter(self.cfg, self.res, self.teleport, "bonus-teleport")
-              ]
+            [ BonusWithTimer(self.cfg, self.res, self.rich_mode_on, self.rich_mode_off, "bonus-rich", "Registeres give more points"),
+              BonusWithTimer(self.cfg, self.res, self.ferris.set_speed_fast, self.ferris.set_speed_normal, "bonus-speed", "Ferris moves much faster"),
+              BonusWithTimer(self.cfg, self.res, self.enemies_flee_on, self.enemies_flee_off, "bonus-enemies-flee", "Sen enemies to their startpoints"),
+              BonusWithCounter(self.cfg, self.res, self.pick_register, "bonus-pick", "Instantaneously pick the register"), ],
+
+            [ BonusWithTimer(self.cfg, self.res, self.lights_crash_on, self.lights_crash_off, "bonus-lights", "Traffic lights go red"),
+              BonusWithTimer(self.cfg, self.res, self.bullet_time_on, self.bullet_time_off, "bonus-slow", "Everything but you moves much slower"),
+              BonusWithCounter(self.cfg, self.res, self.teleport, "bonus-teleport", "You can teleport using mouse"),
+              BonusWithTimer(self.cfg, self.res, self.remote_gather_on, self.remote_gather_off, "bonus-remote-gather", "Pick registers from distance", True), ]
             ]
 
     def set_level(self, level_num):
@@ -458,6 +468,11 @@ class FerrisRunGame(GameState):
         self.stopped = True
 
     def go_to_next_level(self):
+        if self.level_num >= 2 and self.level_num <= 5:
+            self.fsm.set_state(ChooseUpgradeWindow(self.cfg, self.res, self,
+                                                   self.possible_bonuses[0][self.level_num - 3],
+                                                   self.possible_bonuses[1][self.level_num - 3]))
+            self.__is_finished = False
         self.blood_positions = []
         self.set_level(self.level_num + 1)
         for bonus in self.bonuses:
@@ -668,6 +683,9 @@ class FerrisRunGame(GameState):
                 if event.key == K_0:
                     self.cfg.print_fps = not self.cfg.print_fps
 
+    def add_upgrade(self, upgrade):
+        self.bonuses.append(upgrade)
+
     def display(self, screen):
         self.background.display(screen, (0,0))
 
@@ -698,7 +716,7 @@ class FerrisRunGame(GameState):
             self.display_key_value(screen, (menu_x, bonus_y-40), "BONUSES")
         for bonus in self.bonuses:
             if bonus.active:
-                pygame.draw.rect(screen, color.by_name["blue"], (self.cfg.board_size[0]+10-3, bonus_y-1, 46, 43), 3)
+                 pygame.draw.rect(screen, color.by_name["blue"], (self.cfg.board_size[0]+10-3, bonus_y-1, 46, 43), 3)
             if bonus.finished:
                 bonus.sprite_dark.display(screen, (self.cfg.board_size[0]+10, bonus_y))
             else:
@@ -754,6 +772,7 @@ class FerrisRunGame(GameState):
         screen.blit(value, (position[0]+130, position[1]))
 
     def finish(self):
+        # don't add code here!
         self.__is_finished = True
 
     def is_finished(self):
@@ -763,6 +782,7 @@ def main():
     cfg = Config()
     fsm = GameFsm(cfg)
     res = Resources(cfg).load_all()
-    fsm.set_state(FerrisRunGame(cfg,res))
     pygame.display.set_caption(cfg.app_name)
+    game_state = FerrisRunGame(cfg,res,fsm)
+    fsm.set_state(game_state)
     fsm.run()
